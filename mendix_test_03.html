@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Examen Mendix</title>
+    <style>
+        :root {
+            --primary-color: #0595DB;
+            --secondary-color: #FF6B00;
+            --accent-color: #00C1D4;
+            --light-color: #F5F7FA;
+            --dark-color: #2D3748;
+            --success-color: #48BB78;
+            --error-color: #F56565;
+            --warning-color: #ED8936;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .exam-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: white;
+            padding: 15px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: var(--light-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .timer i {
+            margin-right: 10px;
+        }
+        
+        .progress-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .progress-text {
+            margin-right: 15px;
+            font-weight: 500;
+        }
+        
+        progress {
+            width: 200px;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        progress::-webkit-progress-bar {
+            background-color: var(--light-color);
+            border-radius: 10px;
+        }
+        
+        progress::-webkit-progress-value {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+        }
+        
+        .question-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        
+        .question-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .domain-tag {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .options-container {
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: var(--light-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background-color: #E2E8F0;
+        }
+        
+        .option.selected {
+            background-color: #EBF8FF;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .option.correct {
+            background-color: #F0FFF4;
+            border: 2px solid var(--success-color);
+        }
+        
+        .option.incorrect {
+            background-color: #FFF5F5;
+            border: 2px solid var(--error-color);
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: white;
+        }
+        
+        .selected .option-letter {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .correct .option-letter {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .incorrect .option-letter {
+            background-color: var(--error-color);
+            color: white;
+        }
+        
+        .option-text {
+            flex-grow: 1;
+        }
+        
+        .feedback-container {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .feedback-container.show {
+            display: block;
+        }
+        
+        .correct-feedback {
+            background-color: #F0FFF4;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .incorrect-feedback {
+            background-color: #FFF5F5;
+            border-left: 5px solid var(--error-color);
+        }
+        
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .feedback-header i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .correct-feedback .feedback-header {
+            color: var(--success-color);
+        }
+        
+        .incorrect-feedback .feedback-header {
+            color: var(--error-color);
+        }
+        
+        .explanation {
+            margin-bottom: 10px;
+        }
+        
+        .general-explanation {
+            font-style: italic;
+            color: #4A5568;
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .btn-prev {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-prev:hover {
+            background-color: #EBF8FF;
+        }
+        
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-next:hover {
+            background-color: #0579B5;
+        }
+        
+        .btn-submit {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-submit:hover {
+            background-color: #E05A00;
+        }
+        
+        .results-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .results-container.show {
+            display: block;
+        }
+        
+        .results-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .success-icon {
+            color: var(--success-color);
+        }
+        
+        .warning-icon {
+            color: var(--warning-color);
+        }
+        
+        .results-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+        
+        .results-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .results-details {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .result-stat {
+            margin: 0 15px;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+        
+        .correct-stat {
+            background-color: #F0FFF4;
+            color: var(--success-color);
+        }
+        
+        .incorrect-stat {
+            background-color: #FFF5F5;
+            color: var(--error-color);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .btn-restart {
+            background-color: var(--accent-color);
+            color: white;
+            margin: 0 auto;
+        }
+        
+        .btn-restart:hover {
+            background-color: #00A3B5;
+        }
+        
+        @media (max-width: 768px) {
+            .exam-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .progress-container {
+                margin-top: 15px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .timer {
+                margin-bottom: 15px;
+            }
+            
+            .results-details {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .result-stat {
+                margin: 10px 0;
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Examen Mendix</h1>
+            <p>Practica para tu certificación con este examen interactivo</p>
+        </header>
+        
+        <div class="exam-info">
+            <div class="timer">
+                <i class="fas fa-clock"></i>
+                <span id="time">60:00</span>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text">Progreso:</span>
+                <progress id="progress" value="1" max="50"></progress>
+                <span id="progress-text">1/50</span>
+            </div>
+        </div>
+        
+        <div id="question-container" class="question-container fade-in">
+            <div class="question-header">
+                <span class="question-number">Pregunta 1</span>
+                <span class="domain-tag">Security</span>
+            </div>
+            
+            <div class="question-text">
+                When setting up security for a Mendix application, what is the purpose of 'User role inheritance'?
+            </div>
+            
+            <div class="options-container">
+                <div class="option" data-option="A">
+                    <span class="option-letter">A</span>
+                    <div class="option-text">To allow user roles to inherit access rights from other roles.</div>
+                </div>
+                <div class="option" data-option="B">
+                    <span class="option-letter">B</span>
+                    <div class="option-text">To automatically assign new users to existing roles.</div>
+                </div>
+                <div class="option" data-option="C">
+                    <span class="option-letter">C</span>
+                    <div class="option-text">To create a backup role in case the primary role is deleted.</div>
+                </div>
+                <div class="option" data-option="D">
+                    <span class="option-letter">D</span>
+                    <div class="option-text">To duplicate permissions for creating new, similar roles.</div>
+                </div>
+            </div>
+            
+            <div id="feedback" class="feedback-container">
+                <div class="feedback-header">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Tu respuesta es correcta</span>
+                </div>
+                <div class="explanation">
+                    (Correct) This option is correct because user role inheritance in Mendix allows a user role to inherit permissions and access rights from another role, simplifying the management of user permissions.
+                </div>
+                <div class="general-explanation">
+                    User role inheritance in Mendix is a feature that allows a user role to inherit permissions and access rights from another role. This simplifies the management of user permissions by reducing redundancy and ensuring consistency across different user roles.
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="btn-prev" disabled>
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn-next">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="results-container" class="results-container">
+            <div class="results-icon success-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="results-title">¡Examen Completado!</h2>
+            <div class="results-score">85%</div>
+            
+            <div class="results-details">
+                <div class="result-stat correct-stat">
+                    <div class="stat-number">42</div>
+                    <div>Correctas</div>
+                </div>
+                <div class="result-stat incorrect-stat">
+                    <div class="stat-number">8</div>
+                    <div>Incorrectas</div>
+                </div>
+            </div>
+            
+            <button class="btn-restart" id="restart-btn">
+                <i class="fas fa-redo"></i> Reiniciar Examen
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Datos del examen
+        const examData = [
+    {
+        question: "When setting up security for a Mendix application, what is the purpose of 'User role inheritance'?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "To allow user roles to inherit access rights from other roles.", correct: true, explanation: "(Correct) This option is correct because user role inheritance in Mendix allows a user role to inherit permissions and access rights from another role, simplifying the management of user permissions." },
+            { letter: "B", text: "To automatically assign new users to existing roles.", correct: false, explanation: "(Incorrect) This option is incorrect because user role inheritance does not automatically assign new users to roles; it only deals with the inheritance of permissions between roles." },
+            { letter: "C", text: "To create a backup role in case the primary role is deleted.", correct: false, explanation: "(Incorrect) This option is incorrect because user role inheritance is not designed to create backup roles. It is about sharing permissions between roles." },
+            { letter: "D", text: "To duplicate permissions for creating new, similar roles.", correct: false, explanation: "(Incorrect) This option is incorrect because user role inheritance does not duplicate permissions but allows one role to inherit permissions from another, reducing redundancy." }
+        ],
+        generalExplanation: "User role inheritance in Mendix is a feature that allows a user role to inherit permissions and access rights from another role. This simplifies the management of user permissions by reducing redundancy and ensuring consistency across different user roles."
+    },
+    {
+        question: "How does Mendix ensure that an app's user interface is automatically adapted to the screen size of the device?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "By using fixed layouts", correct: false, explanation: "(Incorrect) Fixed layouts do not adapt to different screen sizes. They are static and designed for specific dimensions, making them unsuitable for responsive design." },
+            { letter: "B", text: "Through custom CSS for each device type", correct: false, explanation: "(Incorrect) While custom CSS can be used to create different styles for various devices, it is not an automatic process and requires manual coding for each device type." },
+            { letter: "C", text: "By applying responsive design principles", correct: true, explanation: "(Correct) Responsive design principles ensure that the user interface automatically adapts to different screen sizes. Mendix uses these principles to provide a seamless experience across devices." },
+            { letter: "D", text: "With the use of separate profiles for mobile and desktop", correct: false, explanation: "(Incorrect) Separate profiles for mobile and desktop can help tailor the user experience but do not automatically adapt the UI to different screen sizes." }
+        ],
+        generalExplanation: "Mendix ensures that an app's user interface automatically adapts to the screen size of the device by applying responsive design principles. This approach allows the UI to adjust and provide an optimal viewing experience on various devices without requiring manual intervention for each device type."
+    },
+    {
+        question: "In Mendix, what is the implication of setting an entity's 'Delete' behavior to 'Cascade' for associated objects?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Associated objects are also deleted when the main entity is deleted.", correct: true, explanation: "(Correct) When the 'Delete' behavior is set to 'Cascade', deleting the main entity will also delete all associated objects, ensuring data integrity by removing dependent data." },
+            { letter: "B", text: "Deletion of the main entity is prevented if associated objects exist.", correct: false, explanation: "(Incorrect) This behavior describes a 'Restricted' delete behavior, where the main entity cannot be deleted if there are existing associated objects." },
+            { letter: "C", text: "Associated objects are disconnected but not deleted when the main entity is deleted.", correct: false, explanation: "(Incorrect) This describes a 'Nullify' delete behavior, where the associations are removed, but the associated objects themselves are not deleted." },
+            { letter: "D", text: "Cascade delete must be manually triggered by a microflow.", correct: false, explanation: "(Incorrect) Cascade delete is an automatic behavior that does not require manual intervention through a microflow; it is triggered automatically when the main entity is deleted." }
+        ],
+        generalExplanation: "In Mendix, setting an entity's 'Delete' behavior to 'Cascade' ensures that when the main entity is deleted, all associated objects are also automatically deleted. This helps maintain data consistency and integrity by ensuring that no orphaned records remain in the database."
+    },
+    {
+        question: "What is the primary purpose of 'annotations' in a Mendix microflow?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "To change the execution path of the microflow", correct: false, explanation: "(Incorrect) Annotations in Mendix microflows do not change the execution path. They are purely for documentation purposes and do not affect the logic or flow of the microflow." },
+            { letter: "B", text: "To document the purpose and logic of the microflow steps", correct: true, explanation: "(Correct) Annotations are used to document the purpose and logic of the microflow steps. They help developers and stakeholders understand the design and rationale behind the microflow." },
+            { letter: "C", text: "To store temporary data during the execution of the microflow", correct: false, explanation: "(Incorrect) Annotations do not store temporary data. Variables or other data storage mechanisms within the microflow are used for this purpose." },
+            { letter: "D", text: "To trigger events based on user actions", correct: false, explanation: "(Incorrect) Annotations cannot trigger events. Event triggers are handled by specific microflow actions and event handlers within Mendix." }
+        ],
+        generalExplanation: "Annotations in Mendix microflows are primarily used for documentation purposes. They help in explaining the purpose and logic behind various steps in the microflow, aiding both current and future developers in understanding and maintaining the microflow."
+    },
+    {
+        question: "Which expression in a microflow decision would indicate that an object of the entity 'Course' has been selected?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "$Course != null", correct: true, explanation: "(Correct) This expression checks if the 'Course' object exists. If it is not null, it indicates that an object of the entity 'Course' has been selected." },
+            { letter: "B", text: "$Course/Name != ''", correct: false, explanation: "(Incorrect) This expression checks if the 'Name' attribute of the 'Course' object is not an empty string. It does not necessarily indicate that a 'Course' object has been selected." },
+            { letter: "C", text: "$Course/Selected = true", correct: false, explanation: "(Incorrect) This expression checks if the 'Selected' attribute of the 'Course' object is true. This attribute may not exist and does not confirm the selection of the 'Course' object." },
+            { letter: "D", text: "$Course/ID > 0", correct: false, explanation: "(Incorrect) This expression checks if the 'ID' attribute of the 'Course' object is greater than 0. While it may imply an existing object, it is not a standard way to check for selection." }
+        ],
+        generalExplanation: "The goal is to determine if a 'Course' object has been selected. The most reliable way is to check if the object is not null. Other options either check specific attributes or assume the presence of certain fields, which may not be universally applicable."
+    },
+    {
+        question: "Which Scrum artifact provides a visual representation of the work left to do in the Sprint?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "The Product Backlog", correct: false, explanation: "(Incorrect) The Product Backlog is a comprehensive list of all desired work on the project. It does not provide a visual representation of the work left to do in the current Sprint." },
+            { letter: "B", text: "The Sprint Backlog", correct: false, explanation: "(Incorrect) The Sprint Backlog contains the tasks and user stories selected for the current Sprint, but it does not visually represent the remaining work." },
+            { letter: "C", text: "The Burndown Chart", correct: true, explanation: "(Correct) The Burndown Chart provides a visual representation of the work left to do in the Sprint. It shows the remaining effort against the time available." },
+            { letter: "D", text: "The Increment", correct: false, explanation: "(Incorrect) The Increment is the sum of all the Product Backlog items completed during a Sprint and the value of the increments of all previous Sprints. It does not visually represent remaining work." }
+        ],
+        generalExplanation: "The Burndown Chart is the correct artifact that visually represents the work left to do in the Sprint. It helps the team track progress and predict whether they will complete the work by the end of the Sprint."
+    },
+    {
+        question: "How can Mendix users demonstrate their proficiency and experience within the platform?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "By achieving high scores on Mendix games", correct: false, explanation: "(Incorrect) While Mendix games can be fun and educational, high scores on these games do not formally demonstrate proficiency or experience within the platform." },
+            { letter: "B", text: "By earning and displaying certification badges", correct: true, explanation: "(Correct) Certification badges are an official recognition of a user's proficiency and experience within the Mendix platform, making this a valid way to demonstrate skills." },
+            { letter: "C", text: "By writing articles about Mendix", correct: false, explanation: "(Incorrect) Writing articles can show knowledge and engagement with the community, but it does not formally validate proficiency or experience like certification does." },
+            { letter: "D", text: "By participating in Mendix hackathons", correct: false, explanation: "(Incorrect) Participating in hackathons can demonstrate practical skills and creativity, but it is not an official measure of proficiency or experience within the platform." }
+        ],
+        generalExplanation: "Earning and displaying certification badges is the most formal and recognized way to demonstrate proficiency and experience within the Mendix platform. While other activities like games, writing articles, and participating in hackathons can showcase skills and engagement, they do not provide formal validation like certifications do."
+    },
+    {
+        question: "Which microflow activity is used to retrieve data from the database in a Mendix application?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "Create object activity", correct: false, explanation: "(Incorrect) The Create object activity is used to create a new instance of an entity in the database, not to retrieve existing data." },
+            { letter: "B", text: "Retrieve object(s) activity", correct: true, explanation: "(Correct) The Retrieve object(s) activity is used to fetch data from the database based on certain conditions or constraints." },
+            { letter: "C", text: "Aggregate list activity", correct: false, explanation: "(Incorrect) The Aggregate list activity is used to perform aggregate functions like sum, count, or average on a list of objects, not to retrieve data from the database." },
+            { letter: "D", text: "Change object activity", correct: false, explanation: "(Incorrect) The Change object activity is used to modify the attributes of an existing object in the database, not to retrieve it." }
+        ],
+        generalExplanation: "The Retrieve object(s) activity is the correct option for retrieving data from the database in a Mendix application. This activity allows you to specify conditions to fetch specific records from the database, making it essential for data retrieval operations in microflows."
+    },
+    {
+        question: "What is the purpose of the 'Retrieve by Association' microflow activity?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "To update the associated objects of a given object", correct: false, explanation: "(Incorrect) This option describes an action that modifies associated objects, which is not the purpose of the 'Retrieve by Association' microflow activity." },
+            { letter: "B", text: "To retrieve objects that are associated with a given object via a specific association", correct: true, explanation: "(Correct) This option accurately describes the purpose of the 'Retrieve by Association' microflow activity, which is to fetch objects linked to a given object through a specified association." },
+            { letter: "C", text: "To delete all objects associated with a given object", correct: false, explanation: "(Incorrect) This option describes an action that removes associated objects, which is not the function of the 'Retrieve by Association' microflow activity." },
+            { letter: "D", text: "To create a new association between two objects", correct: false, explanation: "(Incorrect) This option describes an action that establishes a new link between objects, which is not the purpose of the 'Retrieve by Association' microflow activity." }
+        ],
+        generalExplanation: "The 'Retrieve by Association' microflow activity in Mendix is used to fetch objects that are linked to a given object through a specified association. This is essential for accessing related data efficiently within the application. The correct option is Option 2."
+    },
+    {
+        question: "In the Mendix domain model, what is the purpose of an 'entity'?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "To define the user interface components", correct: false, explanation: "(Incorrect) Entities in Mendix are not used to define user interface components. They are used to represent data structures or database tables." },
+            { letter: "B", text: "To represent a database table or a data structure", correct: true, explanation: "(Correct) An entity in Mendix is a fundamental part of the domain model and is used to represent a database table or a data structure, storing data and defining relationships between data." },
+            { letter: "C", text: "To store the logic for handling user interactions", correct: false, explanation: "(Incorrect) Entities do not store logic for handling user interactions. This is typically handled by microflows or nanoflows in Mendix." },
+            { letter: "D", text: "To configure security settings for the application", correct: false, explanation: "(Incorrect) Entities themselves do not configure security settings. Security settings are configured separately in Mendix, though they can be applied to entities." }
+        ],
+        generalExplanation: "In Mendix, an entity is a core component of the domain model that represents a database table or a data structure. It defines the data that will be stored and managed within the application, including attributes and relationships with other entities."
+    },
+    // Continuación con las preguntas 11 a 20...
+    {
+        question: "How can developers ensure they are using the latest features in Mendix?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "By subscribing to the Mendix newsletter", correct: false, explanation: "(Incorrect) While the Mendix newsletter provides useful updates and information, it may not always include detailed information on the latest features and their implementations." },
+            { letter: "B", text: "By attending annual Mendix conferences", correct: false, explanation: "(Incorrect) Annual conferences are beneficial for networking and learning, but they do not guarantee immediate or comprehensive information on the latest features as they are released." },
+            { letter: "C", text: "By following the Mendix release notes", correct: true, explanation: "(Correct) Mendix release notes provide detailed and timely information about new features, improvements, and bug fixes, ensuring developers are up-to-date with the latest capabilities." },
+            { letter: "D", text: "By joining beta testing programs for new releases", correct: false, explanation: "(Incorrect) Beta testing programs give early access to new features, but they may not always provide full documentation or be suitable for production environments." }
+        ],
+        generalExplanation: "To ensure they are using the latest features in Mendix, developers should follow the Mendix release notes. Release notes offer comprehensive and timely updates on new features, improvements, and bug fixes, making them the most reliable source for staying current with the platform's capabilities."
+    },
+    {
+        question: "Which microflow activity should be used to group a list of objects by a specific attribute?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "Sort List", correct: false, explanation: "(Incorrect) The 'Sort List' activity orders the list based on specified attributes but does not group objects by a specific attribute." },
+            { letter: "B", text: "Aggregate List", correct: true, explanation: "(Correct) The 'Aggregate List' activity can be used to group a list of objects by a specific attribute, performing operations like counting, summing, or averaging." },
+            { letter: "C", text: "Filter List", correct: false, explanation: "(Incorrect) The 'Filter List' activity is used to filter out objects from a list based on a condition, not to group them by an attribute." },
+            { letter: "D", text: "Group List", correct: false, explanation: "(Incorrect) There is no specific 'Group List' activity in Mendix microflows. Grouping is typically achieved using aggregation or custom logic." }
+        ],
+        generalExplanation: "In Mendix microflows, to group a list of objects by a specific attribute, the 'Aggregate List' activity is used. This activity allows for operations like counting, summing, or averaging based on a specific attribute. Other options like 'Sort List' and 'Filter List' serve different purposes and do not group objects by attributes."
+    },
+    {
+        question: "Which microflow activity should you use when you need to modify an attribute's value for a specific object?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "Change Object", correct: true, explanation: "(Correct) This activity is used to modify an attribute's value for a specific object. It allows you to update the properties of an existing object." },
+            { letter: "B", text: "Create Object", correct: false, explanation: "(Incorrect) This activity is used to create a new object, not to modify attributes of an existing one." },
+            { letter: "C", text: "Aggregate List", correct: false, explanation: "(Incorrect) This activity is used to perform aggregate functions like count, sum, or average on a list of objects, not to modify individual object attributes." },
+            { letter: "D", text: "Call Microflow", correct: false, explanation: "(Incorrect) This activity is used to call another microflow, which may or may not modify an attribute, but it is not the direct method for modifying an attribute's value." }
+        ],
+        generalExplanation: "To modify an attribute's value for a specific object in a Mendix microflow, the 'Change Object' activity should be used. This activity allows you to set the new value for the attribute of the existing object directly."
+    },
+    {
+        question: "Which stages of the Application Lifecycle are supported by the Mendix platform?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "Design and Testing only", correct: false, explanation: "(Incorrect) Mendix supports more than just Design and Testing. It covers the entire application lifecycle, from initial ideation through to retirement." },
+            { letter: "B", text: "Development and Deployment only", correct: false, explanation: "(Incorrect) While Mendix does support Development and Deployment, it also includes other stages such as Ideation and Maintenance." },
+            { letter: "C", text: "Ideation, Development, and Maintenance", correct: false, explanation: "(Incorrect) Although Mendix supports these stages, it also includes other stages like Deployment and Retirement." },
+            { letter: "D", text: "All stages from Ideation to Retirement", correct: true, explanation: "(Correct) Mendix supports the entire application lifecycle, from the initial Ideation phase through to the Retirement phase, encompassing all stages in between." }
+        ],
+        generalExplanation: "The Mendix platform is designed to support the full application lifecycle, covering every stage from initial ideation to final retirement. This comprehensive support ensures that users can manage their applications effectively through all phases of development and maintenance."
+    },
+    {
+        question: "How can you ensure that an email attribute in Mendix is valid and follows a specific format?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "By using the 'Format string' function", correct: false, explanation: "(Incorrect) The 'Format string' function is used to format strings for display purposes, not for validation. It does not ensure that an email follows a specific format." },
+            { letter: "B", text: "Through a custom JavaScript action", correct: false, explanation: "(Incorrect) While a custom JavaScript action could technically be used for validation, it is not the most efficient or recommended approach in Mendix for validating email format." },
+            { letter: "C", text: "By applying a 'Regular expression' validation rule", correct: true, explanation: "(Correct) Using a 'Regular expression' validation rule is the most appropriate method to ensure an email attribute follows a specific format. It allows for precise pattern matching." },
+            { letter: "D", text: "With an 'On change' event handler", correct: false, explanation: "(Incorrect) An 'On change' event handler can trigger validation logic, but it requires additional implementation and is not as straightforward as using a regular expression." }
+        ],
+        generalExplanation: "To ensure that an email attribute in Mendix is valid and follows a specific format, the best approach is to use a 'Regular expression' validation rule. This method allows for precise pattern matching and is specifically designed for validating input formats. Other methods, such as custom JavaScript actions or 'On change' event handlers, are less efficient and require more complex implementation."
+    },
+    {
+        question: "In Mendix, what is the implication of deleting an object that is part of an association with delete behavior set to 'Delete the associated objects'?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "Only the selected object is deleted, and associated objects remain intact.", correct: false, explanation: "(Incorrect) This option is incorrect because the delete behavior is set to 'Delete the associated objects,' which means that associated objects should also be deleted." },
+            { letter: "B", text: "The selected object and all associated objects are deleted.", correct: true, explanation: "(Correct) This option is correct because when the delete behavior is set to 'Delete the associated objects,' deleting an object will also delete all objects associated with it." },
+            { letter: "C", text: "The deletion is prevented if there are any associated objects.", correct: false, explanation: "(Incorrect) This option is incorrect because the delete behavior does not prevent deletion; instead, it ensures associated objects are also deleted." },
+            { letter: "D", text: "The associated objects are disconnected, but not deleted.", correct: false, explanation: "(Incorrect) This option is incorrect because the delete behavior specified is 'Delete the associated objects,' not 'Disconnect the associated objects.'" }
+        ],
+        generalExplanation: "When an object is part of an association with delete behavior set to 'Delete the associated objects,' deleting the object will also delete all objects associated with it. This ensures that no orphaned associated objects remain in the database."
+    },
+    {
+        question: "How should you address a situation where a non-administrative user role needs to view but not edit a specific entity attribute?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Grant full read and write access to the attribute for the user role.", correct: false, explanation: "(Incorrect) This option is not suitable as it provides more access than necessary, potentially leading to unauthorized modifications." },
+            { letter: "B", text: "Create a new user role with administrative privileges.", correct: false, explanation: "(Incorrect) Granting administrative privileges is excessive for a requirement to only view an attribute and can pose security risks." },
+            { letter: "C", text: "Provide read-only access to the attribute for the user role.", correct: true, explanation: "(Correct) This option meets the requirement perfectly by allowing the user to view the attribute without the ability to edit it." },
+            { letter: "D", text: "Remove the attribute from the domain model.", correct: false, explanation: "(Incorrect) Removing the attribute would prevent anyone from accessing it, which does not fulfill the need to view the attribute." }
+        ],
+        generalExplanation: "The goal is to allow a non-administrative user role to view but not edit a specific entity attribute. Option 3 is the correct choice as it provides read-only access, ensuring the user can see the attribute without making any changes. Other options either provide excessive access or do not meet the requirement at all."
+    },
+    {
+        question: "When a microflow includes a 'Java action', what is its primary purpose?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "To execute custom Java code within the microflow", correct: true, explanation: "(Correct) This option is correct. The primary purpose of a 'Java action' in a microflow is to execute custom Java code, which allows for extending the functionality of the Mendix application beyond what is available in standard microflow activities." },
+            { letter: "B", text: "To convert microflow logic into Java code", correct: false, explanation: "(Incorrect) This option is incorrect. A 'Java action' does not convert microflow logic into Java code. Instead, it allows for the execution of custom Java code within the microflow." },
+            { letter: "C", text: "To initiate a Java-based web service call", correct: false, explanation: "(Incorrect) This option is incorrect. While a 'Java action' could be used to initiate a web service call, its primary purpose is to execute custom Java code. Initiating web service calls can be done through other microflow activities." },
+            { letter: "D", text: "To import Java libraries into the Mendix application", correct: false, explanation: "(Incorrect) This option is incorrect. A 'Java action' does not import Java libraries into the Mendix application. Instead, it executes custom Java code. Java libraries can be included in the project separately if needed." }
+        ],
+        generalExplanation: "The primary purpose of a 'Java action' in a microflow is to execute custom Java code. This allows developers to extend the functionality of Mendix applications by incorporating custom logic that is not achievable through standard microflow activities."
+    },
+    {
+        question: "What parameter should be passed to a microflow when creating a new TrainingEvent from the course overview page to prefill some information?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "The Course object", correct: true, explanation: "(Correct) Passing the Course object allows the microflow to access and prefill relevant information from the Course when creating a new TrainingEvent." },
+            { letter: "B", text: "The TrainingEvent object", correct: false, explanation: "(Incorrect) The TrainingEvent object does not exist yet; it is being created. Passing it would not provide the necessary information to prefill." },
+            { letter: "C", text: "The User object of the current session", correct: false, explanation: "(Incorrect) While the User object might be useful for other purposes, it does not provide the specific course-related information needed to prefill a new TrainingEvent." },
+            { letter: "D", text: "No parameter is required", correct: false, explanation: "(Incorrect) Without passing any parameter, the microflow would lack the necessary context to prefill information for the new TrainingEvent." }
+        ],
+        generalExplanation: "When creating a new TrainingEvent from the course overview page, passing the Course object as a parameter to the microflow is essential. This allows the microflow to access specific details about the course, which can be used to prefill relevant fields in the TrainingEvent, ensuring consistency and saving time for the user."
+    },
+    {
+        question: "Where in the Mendix platform can you set up and adjust access rights for microflows?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "In the Project Dashboard settings.", correct: false, explanation: "(Incorrect) The Project Dashboard settings are primarily used for managing project-level configurations and overviews, not for setting up or adjusting access rights for microflows." },
+            { letter: "B", text: "Within the microflow properties panel.", correct: false, explanation: "(Incorrect) The microflow properties panel allows you to configure properties specific to the microflow, such as its name and return type, but not access rights." },
+            { letter: "C", text: "In the Security section of Project Settings.", correct: true, explanation: "(Correct) The Security section of Project Settings is where you can define and adjust access rights for various components, including microflows, ensuring proper permissions are set." },
+            { letter: "D", text: "Under the Version Control configurations.", correct: false, explanation: "(Incorrect) Version Control configurations are used for managing the version history and collaboration aspects of the project, not for setting up access rights for microflows." }
+        ],
+        generalExplanation: "In Mendix, access rights for microflows are managed within the Security section of Project Settings. This section allows you to define roles and permissions to control who can execute or modify specific microflows, ensuring secure and controlled access to application functionalities."
+    },
+    // Continuación con las preguntas 21 a 30...
+    {
+        question: "What Mendix feature allows you to create device-specific pages, such as for mobile only?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "Responsive design settings", correct: false, explanation: "(Incorrect) Responsive design settings allow you to create layouts that adapt to different screen sizes and orientations, but they do not specifically target device types like mobile or desktop." },
+            { letter: "B", text: "Device profile configuration", correct: true, explanation: "(Correct) Device profile configuration in Mendix allows you to create specific pages tailored for different device types, such as mobile, tablet, and desktop, ensuring an optimal user experience." },
+            { letter: "C", text: "Conditional visibility rules", correct: false, explanation: "(Incorrect) Conditional visibility rules control the visibility of elements based on certain conditions but do not create device-specific pages. These rules can hide or show elements based on user roles or data values." },
+            { letter: "D", text: "Custom style sheets", correct: false, explanation: "(Incorrect) Custom style sheets allow you to apply specific styles to your application, but they do not facilitate the creation of device-specific pages. They are used for styling elements across different devices." }
+        ],
+        generalExplanation: "The correct feature for creating device-specific pages in Mendix is 'Device profile configuration.' This feature allows you to design and implement pages that are specifically tailored for different devices, ensuring a better user experience across mobile, tablet, and desktop devices."
+    },
+    {
+        question: "When modeling a scenario where a Book entity must be associated with multiple Author entities, which Mendix association type is most appropriate?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "One-to-Many Association", correct: false, explanation: "(Incorrect) One-to-Many Association means one Book can be associated with multiple Authors, but each Author would be associated with only one Book. This does not fit the scenario where a Book can have multiple Authors and each Author can write multiple Books." },
+            { letter: "B", text: "Many-to-Many Association", correct: true, explanation: "(Correct) Many-to-Many Association allows each Book to be associated with multiple Authors and each Author to be associated with multiple Books. This fits the scenario perfectly." },
+            { letter: "C", text: "One-to-One Association", correct: false, explanation: "(Incorrect) One-to-One Association means each Book can be associated with only one Author and vice versa. This does not fit the scenario where a Book can have multiple Authors." },
+            { letter: "D", text: "Self-Association", correct: false, explanation: "(Incorrect) Self-Association is used when an entity needs to be associated with itself. This is not relevant to the scenario where a Book needs to be associated with multiple Authors." }
+        ],
+        generalExplanation: "For the scenario where a Book entity must be associated with multiple Author entities, a Many-to-Many Association is the most appropriate. This allows for the flexibility of each Book having multiple Authors and each Author contributing to multiple Books."
+    },
+    {
+        question: "What is the function of a Reference Selector in a Mendix application?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "It is used to select a single object from a list of objects associated through a One-to-Many Association.", correct: false, explanation: "Incorrect: A Reference Selector is not typically used for selecting from a One-to-Many Association. Instead, a Data Grid or List View is more appropriate for such associations." },
+            { letter: "B", text: "It is used to select a single object from a list of objects associated through a Many-to-Many Association.", correct: false, explanation: "Incorrect: A Reference Selector is not designed for Many-to-Many Associations. Many-to-Many Associations usually require a different approach, like using a Reference Set Selector." },
+            { letter: "C", text: "It is used to select a single object from a list of objects associated through a One-to-One Association.", correct: true, explanation: "Correct: A Reference Selector is used to select a single object from a list of objects associated through a One-to-One Association, as it facilitates the selection of a single related object." },
+            { letter: "D", text: "It is used to create a new association between two previously unlinked objects.", correct: false, explanation: "Incorrect: A Reference Selector does not create new associations. Instead, it allows users to select an existing associated object from a predefined list." }
+        ],
+        generalExplanation: "A Reference Selector in a Mendix application is used primarily for One-to-One Associations. It enables the selection of a single related object from a list, making it suitable for scenarios where one object needs to be linked to another unique object."
+    },
+    {
+        question: "In Mendix, what is the function of a 'Loop' activity in a microflow?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "To iterate over a list of objects and perform actions for each object", correct: true, explanation: "(Correct) The 'Loop' activity in a Mendix microflow is used to iterate over a list of objects and perform actions on each object in the list. This is the primary function of a loop." },
+            { letter: "B", text: "To repeatedly execute a microflow until a condition is met", correct: false, explanation: "(Incorrect) This describes a 'While' loop, not a 'Loop' activity. The 'Loop' activity specifically iterates over a list, whereas a 'While' loop continues until a condition is satisfied." },
+            { letter: "C", text: "To delay the execution of a microflow for a specified time", correct: false, explanation: "(Incorrect) This describes a 'Delay' activity or a 'Timer', not a 'Loop' activity. A 'Loop' activity does not handle time delays." },
+            { letter: "D", text: "To execute a sub-microflow and return results", correct: false, explanation: "(Incorrect) This describes a 'Call Submicroflow' activity. A 'Loop' activity does not handle the execution of sub-microflows and returning results." }
+        ],
+        generalExplanation: "The 'Loop' activity in a Mendix microflow is designed to iterate over a list of objects and perform specific actions on each object in the list. It is distinct from other activities such as 'While' loops, 'Delays', and 'Call Submicroflow' which serve different purposes within a microflow."
+    },
+    {
+        question: "What is the design approach called in Mendix that ensures pages render well on various devices?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "Flexible design", correct: false, explanation: "(Incorrect) Flexible design is a broad term that refers to designs that can adapt to various conditions. However, it is not the specific approach used in Mendix for rendering pages on various devices." },
+            { letter: "B", text: "Responsive design", correct: true, explanation: "(Correct) Responsive design is the approach used in Mendix to ensure that pages render well on various devices by using fluid grids, flexible images, and CSS media queries." },
+            { letter: "C", text: "Adaptive design", correct: false, explanation: "(Incorrect) Adaptive design involves creating different layouts for different devices. While it ensures good rendering, it is not the approach Mendix primarily uses." },
+            { letter: "D", text: "Cross-platform design", correct: false, explanation: "(Incorrect) Cross-platform design refers to creating applications that work across multiple operating systems. It does not specifically address the rendering of pages on various devices." }
+        ],
+        generalExplanation: "In Mendix, responsive design is used to ensure that pages render well on various devices. This technique involves using fluid grids, flexible images, and CSS media queries to adapt the layout to different screen sizes and orientations."
+    },
+    {
+        question: "Before creating pages in Mendix, what preliminary step should be taken to ensure proper page functionality?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "Configuring the app theme and styles", correct: false, explanation: "(Incorrect) Configuring the app theme and styles is important for the visual design, but it does not impact the core functionality of the pages." },
+            { letter: "B", text: "Defining the Domain Model entities and associations", correct: true, explanation: "(Correct) Defining the Domain Model entities and associations is crucial as it sets up the data structure and relationships necessary for the pages to function properly." },
+            { letter: "C", text: "Setting up the navigation menu", correct: false, explanation: "(Incorrect) Setting up the navigation menu is important for user experience, but it is not a prerequisite for ensuring page functionality." },
+            { letter: "D", text: "Creating a deployment package", correct: false, explanation: "(Incorrect) Creating a deployment package is a step in deploying the application, not in ensuring the functionality of individual pages within the development environment." }
+        ],
+        generalExplanation: "Before creating pages in Mendix, defining the Domain Model entities and associations is essential. This step ensures that the data structure and relationships needed for the pages are in place, allowing for proper functionality and interaction within the application."
+    },
+    {
+        question: "In the Domain Model of a Mendix application, what is the significance of a generalization?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "It specifies the default value for an attribute", correct: false, explanation: "(Incorrect) This option is incorrect because specifying a default value for an attribute is not related to generalization but rather to attribute configuration within an entity." },
+            { letter: "B", text: "It represents a one-to-one relationship between entities", correct: false, explanation: "(Incorrect) This option is incorrect because a one-to-one relationship is represented by associations, not generalizations. Generalizations deal with inheritance hierarchies." },
+            { letter: "C", text: "It defines a parent-child inheritance relationship between entities", correct: true, explanation: "(Correct) This option is correct. Generalization in a domain model signifies an inheritance relationship where a child entity inherits attributes and behaviors from a parent entity." },
+            { letter: "D", text: "It indicates the unique identifier for each entity instance", correct: false, explanation: "(Incorrect) This option is incorrect because the unique identifier for each entity instance is typically represented by an attribute marked as the primary key, not by generalization." }
+        ],
+        generalExplanation: "In a Mendix domain model, generalization is used to create inheritance relationships between entities. This allows a child entity to inherit attributes and behaviors from a parent entity, promoting reusability and better organization of shared characteristics."
+    },
+    {
+        question: "When designing a Domain Model in Mendix, which association type would you use to indicate that a User can be part of multiple Groups, and a Group can contain multiple Users?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "One-to-Many Association", correct: false, explanation: "(Incorrect) A One-to-Many Association implies that one entity (User) can be associated with many instances of another entity (Group), but each instance of the second entity (Group) can only be associated with one instance of the first entity (User)." },
+            { letter: "B", text: "Many-to-Many Association", correct: true, explanation: "(Correct) A Many-to-Many Association is used when multiple instances of one entity (User) can be associated with multiple instances of another entity (Group), and vice versa. This fits the requirement that a User can be part of multiple Groups and a Group can contain multiple Users." },
+            { letter: "C", text: "One-to-One Association", correct: false, explanation: "(Incorrect) A One-to-One Association means that one instance of an entity (User) is associated with one instance of another entity (Group), which does not meet the requirement of multiple associations for both Users and Groups." },
+            { letter: "D", text: "Self-Association", correct: false, explanation: "(Incorrect) A Self-Association is used when instances of the same entity are related to each other. This does not apply to the scenario where Users and Groups are distinct entities." }
+        ],
+        generalExplanation: "For a scenario where a User can be part of multiple Groups and a Group can contain multiple Users, a Many-to-Many Association is the appropriate choice. It allows for the flexible relationship where both entities can have multiple associations with each other."
+    },
+    {
+        question: "Which of the following best describes 'Consistency Check' in Mendix?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "A process to ensure all pages have a consistent design", correct: false, explanation: "(Incorrect) This option refers to design consistency, which is not the primary focus of the 'Consistency Check' in Mendix. The 'Consistency Check' is more about data model integrity." },
+            { letter: "B", text: "A check to confirm that all microflows follow best practices", correct: false, explanation: "(Incorrect) While best practices for microflows are important, the 'Consistency Check' in Mendix specifically targets the data model, not the microflows." },
+            { letter: "C", text: "A tool for verifying that the app's data model is free of errors", correct: true, explanation: "(Correct) The 'Consistency Check' in Mendix is designed to ensure that the data model is free of errors, making it the correct answer for this question." },
+            { letter: "D", text: "A feature that guarantees user roles are set up correctly", correct: false, explanation: "(Incorrect) User role configuration is important for security and access control, but it is not the focus of the 'Consistency Check' in Mendix." }
+        ],
+        generalExplanation: "The 'Consistency Check' in Mendix is a tool used to verify that the application's data model is free of errors. It ensures that the data structure is correctly defined and adheres to Mendix standards, preventing issues that could arise from an inconsistent or incorrect data model."
+    },
+    {
+        question: "In the context of Mendix, what does WYSIWYG stand for?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "What You See Is What You Gain", correct: false, explanation: "(Incorrect) This option is incorrect. WYSIWYG stands for What You See Is What You Get, not What You Gain. This phrase does not accurately describe the concept." },
+            { letter: "B", text: "What You See Is What You Get", correct: true, explanation: "(Correct) This option is correct. WYSIWYG means What You See Is What You Get, indicating that the content displayed during editing appears very similar to the final output." },
+            { letter: "C", text: "When You See It, You Grasp It", correct: false, explanation: "(Incorrect) This option is incorrect. Although it suggests understanding through visualization, it does not accurately represent the WYSIWYG concept in Mendix." },
+            { letter: "D", text: "What You See Is What You Guess", correct: false, explanation: "(Incorrect) This option is incorrect. WYSIWYG ensures that the visual representation during editing matches the final output, which contradicts the idea of guessing." }
+        ],
+        generalExplanation: "WYSIWYG stands for What You See Is What You Get. In the context of Mendix, it refers to a design approach where the user interface being edited appears similar to the final product, enhancing ease of use and accuracy in design."
+    },
+    // Continuación con las preguntas 31 a 40...
+    {
+        question: "In Mendix, what is the function of the 'Navigation' menu?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "To direct the data flow between entities", correct: false, explanation: "(Incorrect) This option is incorrect because the 'Navigation' menu in Mendix does not manage data flow between entities. Data flow is typically handled through microflows and domain models." },
+            { letter: "B", text: "To manage version control and team collaboration", correct: false, explanation: "(Incorrect) This option is incorrect because version control and team collaboration are managed through Mendix's Team Server or version control systems like Git, not through the 'Navigation' menu." },
+            { letter: "C", text: "To provide users with a means to move through the application", correct: true, explanation: "(Correct) This option is correct. The 'Navigation' menu in Mendix is used to define how users move through the application by setting up navigation profiles, home pages, and menu items." },
+            { letter: "D", text: "To configure the app's connection to external databases", correct: false, explanation: "(Incorrect) This option is incorrect because configuring the app's connection to external databases is done through the 'App Settings' or 'Database Configuration' settings, not the 'Navigation' menu." }
+        ],
+        generalExplanation: "The 'Navigation' menu in Mendix is essential for defining the user experience by setting up how users will navigate through the application. It includes settings for navigation profiles, home pages, and menu items, ensuring users can easily move from one part of the application to another."
+    },
+    {
+        question: "What Agile concept involves breaking down features into smaller, manageable chunks of work?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "Timeboxing", correct: false, explanation: "(Incorrect) Timeboxing refers to setting a fixed time period for an activity or task, helping teams manage their work and focus on delivering within the set timeframe." },
+            { letter: "B", text: "Story Mapping", correct: false, explanation: "(Incorrect) Story Mapping is a visual exercise that helps teams understand the user journey and prioritize features, but it does not specifically involve breaking down features into smaller chunks." },
+            { letter: "C", text: "Epic Creation", correct: false, explanation: "(Incorrect) Epic Creation involves defining large bodies of work that can be broken down into smaller tasks or stories, but it does not directly refer to the process of splitting these tasks." },
+            { letter: "D", text: "User Story Splitting", correct: true, explanation: "(Correct) User Story Splitting is the practice of breaking down user stories into smaller, more manageable chunks of work, making them easier to estimate, develop, and test." }
+        ],
+        generalExplanation: "The Agile concept of breaking down features into smaller, manageable chunks of work is known as User Story Splitting. This practice helps teams to handle complex tasks more effectively by dividing them into smaller, actionable items that can be completed within a single iteration or sprint."
+    },
+    {
+        question: "What is the recommended way to manage sensitive information, such as API keys or database credentials, in a Mendix application?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Store them as plain text in microflows.", correct: false, explanation: "(Incorrect) Storing sensitive information in plain text within microflows exposes it to unauthorized access. This practice lacks security and can lead to data breaches." },
+            { letter: "B", text: "Hard-code them into the application's source code.", correct: false, explanation: "(Incorrect) Hard-coding sensitive information into the source code makes it difficult to manage and secure. It increases the risk of exposure if the code is ever accessed by unauthorized users." },
+            { letter: "C", text: "Use environment variables or a secure vault service.", correct: true, explanation: "(Correct) Using environment variables or a secure vault service is a best practice for managing sensitive information. It ensures that credentials are not stored in the codebase and can be managed securely." },
+            { letter: "D", text: "Save them in a text file within the project directory.", correct: false, explanation: "(Incorrect) Saving sensitive information in a text file within the project directory is insecure. It can be easily accessed by anyone with access to the project directory, leading to potential security risks." }
+        ],
+        generalExplanation: "Managing sensitive information such as API keys or database credentials requires a secure approach to prevent unauthorized access and data breaches. The recommended method is to use environment variables or a secure vault service, as they provide a secure and manageable way to handle sensitive information without exposing it in the codebase."
+    },
+    {
+        question: "In the context of Mendix and Agile, how is 'velocity' best described?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "The speed at which the server responds to requests", correct: false, explanation: "(Incorrect) This describes server performance or response time, not team performance in an Agile context." },
+            { letter: "B", text: "The rate at which the team completes work during a Sprint", correct: true, explanation: "(Correct) Velocity in Agile measures the amount of work a team completes in a Sprint, typically in story points or hours." },
+            { letter: "C", text: "The frequency of client feedback sessions", correct: false, explanation: "(Incorrect) This describes the cadence of client interactions, not how much work the team completes." },
+            { letter: "D", text: "The turnaround time for fixing bugs", correct: false, explanation: "(Incorrect) This refers to the time taken to resolve defects, not the overall productivity of the team in a Sprint." }
+        ],
+        generalExplanation: "In Agile methodologies, particularly in the context of Mendix development, 'velocity' is a key metric used to measure the amount of work a team completes during a Sprint. It helps in planning and forecasting future Sprints. Option 2 is the correct answer as it aligns with this definition."
+    },
+    {
+        question: "What is the purpose of the 'Required' attribute property in Mendix?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "To automatically populate the attribute with a default value", correct: false, explanation: "(Incorrect) This option is incorrect because the 'Required' attribute property in Mendix does not deal with default values. It is used to enforce user input validation." },
+            { letter: "B", text: "To ensure the attribute is included in all database queries", correct: false, explanation: "(Incorrect) This option is incorrect as the 'Required' attribute property does not affect database queries. It is focused on ensuring mandatory user input." },
+            { letter: "C", text: "To make the attribute mandatory for the user to fill in", correct: true, explanation: "(Correct) This option is correct. The 'Required' attribute property in Mendix ensures that the user must provide a value for the attribute before saving the form or completing the process." },
+            { letter: "D", text: "To enforce a unique constraint on the attribute", correct: false, explanation: "(Incorrect) This option is incorrect. Enforcing a unique constraint is a different property in Mendix and is not related to the 'Required' attribute property, which ensures mandatory user input." }
+        ],
+        generalExplanation: "The 'Required' attribute property in Mendix ensures that a user must provide a value for the attribute before they can save the form or proceed. This is crucial for maintaining data integrity and ensuring that all necessary information is collected."
+    },
+    {
+        question: "Which validation approach would confirm that an email address ends with '@mendix.com'?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "Regular expression validation", correct: true, explanation: "(Correct) Regular expression validation is the appropriate approach as it allows you to define a pattern that the email address must match, specifically ensuring it ends with '@mendix.com'." },
+            { letter: "B", text: "Range validation", correct: false, explanation: "(Incorrect) Range validation is used to check if a value falls within a specific range, such as numerical values or dates, and is not suitable for validating email address formats." },
+            { letter: "C", text: "Comparison validation", correct: false, explanation: "(Incorrect) Comparison validation is used to compare two values, such as checking if one value is greater than another, and is not appropriate for string pattern matching." },
+            { letter: "D", text: "Null validation", correct: false, explanation: "(Incorrect) Null validation checks if a value is null or not. It does not validate the specific format or content of a string like an email address." }
+        ],
+        generalExplanation: "To confirm that an email address ends with '@mendix.com', regular expression validation is the best approach. It allows you to specify a pattern that the email address must conform to, ensuring precise validation of the email domain."
+    },
+    {
+        question: "What constitutes a valid microflow expression?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "An expression that defines a workflow sequence", correct: false, explanation: "(Incorrect) A workflow sequence defines the order of tasks or activities but does not return a value. Microflow expressions specifically need to return a value." },
+            { letter: "B", text: "A snippet of Java code that can be executed", correct: false, explanation: "(Incorrect) While Java code snippets can be executed, they are not considered microflow expressions. Microflow expressions are specific to the Mendix platform and involve attributes, operators, and functions." },
+            { letter: "C", text: "A combination of attributes, operators, and functions that returns a value", correct: true, explanation: "(Correct) This is the definition of a valid microflow expression in Mendix. It involves using attributes, operators, and functions to compute and return a value." },
+            { letter: "D", text: "A sequence of HTML elements for page layout", correct: false, explanation: "(Incorrect) HTML elements are used for structuring and styling web pages, not for creating microflow expressions that return a value." }
+        ],
+        generalExplanation: "A valid microflow expression in Mendix is a combination of attributes, operators, and functions that returns a value. It is used within the Mendix platform to perform calculations or retrieve data during the execution of a microflow."
+    },
+    {
+        question: "In a Mendix microflow, what is the purpose of an exclusive split?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "To run multiple microflows in parallel", correct: false, explanation: "(Incorrect) An exclusive split does not run multiple microflows in parallel. Instead, it evaluates a condition to decide which single path to follow." },
+            { letter: "B", text: "To stop the execution of the current microflow", correct: false, explanation: "(Incorrect) An exclusive split does not stop the execution of a microflow. It makes a decision based on a condition and continues the flow accordingly." },
+            { letter: "C", text: "To make a decision based on a condition and direct the flow accordingly", correct: true, explanation: "(Correct) An exclusive split evaluates a condition and directs the flow to one of several paths based on the result of the condition." },
+            { letter: "D", text: "To combine multiple flows into a single path", correct: false, explanation: "(Incorrect) An exclusive split does not combine multiple flows into a single path. It is used to branch the flow based on a condition." }
+        ],
+        generalExplanation: "In Mendix microflows, an exclusive split is used to evaluate a condition and direct the flow to different paths based on the result. This is essential for implementing decision logic within the microflow. The correct answer is Option 3."
+    },
+    {
+        question: "What is the primary objective of data validation within an app?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "To ensure data is replicated across multiple databases", correct: false, explanation: "(Incorrect) Data replication is concerned with copying and maintaining database objects in multiple databases. It does not directly relate to the validation of data accuracy or correctness within an application." },
+            { letter: "B", text: "To prevent incorrect or invalid data from being entered or processed", correct: true, explanation: "(Correct) Data validation ensures that only correct and valid data is entered into the system, preventing errors and maintaining data integrity." },
+            { letter: "C", text: "To validate the user's permissions for data access", correct: false, explanation: "(Incorrect) Validating user permissions is related to access control and security, not directly to data validation. Data validation focuses on the correctness of the data itself." },
+            { letter: "D", text: "To confirm that data is deleted when no longer needed", correct: false, explanation: "(Incorrect) Confirming data deletion is a part of data lifecycle management and data retention policies. It is not directly related to ensuring the accuracy or validity of the data." }
+        ],
+        generalExplanation: "The primary objective of data validation within an application is to ensure that only correct and valid data is entered and processed. This helps in maintaining the integrity and reliability of the data within the system, preventing errors and potential issues that can arise from incorrect data."
+    },
+    {
+        question: "How can you ensure that an attribute in a Mendix Domain Model represents a file stored in the application?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "By setting the attribute type to 'FileDocument'", correct: false, explanation: "(Incorrect) Mendix does not support 'FileDocument' as an attribute type directly in the domain model. Files are managed through associations with the 'System.FileDocument' entity." },
+            { letter: "B", text: "By setting the attribute type to 'String'", correct: false, explanation: "(Incorrect) Setting the attribute type to 'String' would not store the file itself but only its path or name. This does not ensure the file is stored in the application." },
+            { letter: "C", text: "By associating the entity with the 'System.FileDocument' entity", correct: true, explanation: "(Correct) Associating the entity with 'System.FileDocument' is the correct way to ensure that a file is stored in the application. This entity is specifically designed to handle file storage in Mendix." },
+            { letter: "D", text: "By creating a custom enumeration for file types", correct: false, explanation: "(Incorrect) Creating a custom enumeration for file types does not store the file itself; it only categorizes file types. This does not ensure the file is stored in the application." }
+        ],
+        generalExplanation: "In Mendix, to store a file within the application, you should associate the entity with the 'System.FileDocument' entity. This entity is designed to handle file storage and management within the Mendix platform."
+    },
+    // Continuación con las preguntas 41 a 50...
+    {
+        question: "How does the Mendix Model SDK facilitate app development?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "By providing a command-line interface for app deployment", correct: false, explanation: "(Incorrect) The Mendix Model SDK does not provide a command-line interface for app deployment. It focuses on model manipulation rather than deployment tasks." },
+            { letter: "B", text: "By offering APIs for integrating third-party services", correct: false, explanation: "(Incorrect) The Mendix Model SDK does not primarily offer APIs for integrating third-party services. It is designed for programmatic manipulation of the app model." },
+            { letter: "C", text: "By allowing developers to programmatically manipulate the app model", correct: true, explanation: "(Correct) The Mendix Model SDK enables developers to programmatically manipulate the app model, allowing automation and customization of app development processes." },
+            { letter: "D", text: "By enabling direct database access for complex queries", correct: false, explanation: "(Incorrect) The Mendix Model SDK does not provide direct database access for complex queries. Its main function is to allow manipulation of the app model." }
+        ],
+        generalExplanation: "The Mendix Model SDK is a tool that allows developers to programmatically manipulate the app model, facilitating automation and customization in the app development process. It does not offer functionalities like command-line deployment, third-party service integration, or direct database access."
+    },
+    {
+        question: "When naming a page in Mendix, what is the best practice to follow?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "Using the name of the primary entity the page displays", correct: true, explanation: "(Correct) Naming a page after the primary entity it displays ensures clarity and consistency, making it easier for developers to understand the purpose of the page at a glance." },
+            { letter: "B", text: "Choosing a unique identifier for each page", correct: false, explanation: "(Incorrect) While unique identifiers ensure no duplication, they do not provide meaningful context about the page's content or purpose, leading to potential confusion." },
+            { letter: "C", text: "Incorporating the current date and time for versioning", correct: false, explanation: "(Incorrect) Using the current date and time for naming pages is not practical as it doesn't convey the page's purpose and can create unnecessary complexity in identifying pages." },
+            { letter: "D", text: "Selecting a name based on the developer's preference", correct: false, explanation: "(Incorrect) Allowing developers to name pages based on personal preference can lead to inconsistency and confusion, especially in larger teams or projects." }
+        ],
+        generalExplanation: "The best practice for naming pages in Mendix is to use the name of the primary entity the page displays. This approach ensures that the page names are clear, consistent, and informative, making it easier for all team members to understand and navigate the project. Avoiding arbitrary or non-descriptive naming conventions helps maintain project organization and clarity."
+    },
+    {
+        question: "Which Mendix association type should be used to establish a bidirectional relationship between two different entities, where changes in one entity should be reflected in the other?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "One-to-Many Association", correct: false, explanation: "Incorrect: A one-to-many association means one entity can be associated with multiple instances of another entity, but not vice versa. It does not support bidirectional synchronization of changes." },
+            { letter: "B", text: "Many-to-Many Association", correct: true, explanation: "Correct: A many-to-many association allows multiple instances of one entity to be associated with multiple instances of another entity, supporting bidirectional relationships and synchronization of changes." },
+            { letter: "C", text: "One-to-One Association", correct: false, explanation: "Incorrect: A one-to-one association links one instance of an entity to one instance of another entity. While it supports bidirectional relationships, it is not suitable for scenarios requiring multiple associations." },
+            { letter: "D", text: "Both-way Association", correct: false, explanation: "Incorrect: 'Both-way Association' is not a recognized term in Mendix. The correct terminology for bidirectional relationships is covered by the other options." }
+        ],
+        generalExplanation: "In Mendix, a many-to-many association is the best choice for establishing a bidirectional relationship between two different entities where changes in one should be reflected in the other. This type of association allows multiple instances of both entities to be interconnected, ensuring that updates in one entity are synchronized with the other."
+    },
+    {
+        question: "Why is it crucial to maintain consistency across different layouts in a Mendix application?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "To ensure that all pages are accessible only by administrators", correct: false, explanation: "(Incorrect) This option is unrelated to layout consistency. Page accessibility is managed by security settings and user roles, not by maintaining consistent layouts." },
+            { letter: "B", text: "To reduce the size of the application package", correct: false, explanation: "(Incorrect) Consistent layouts do not significantly impact the size of the application package. The size is more influenced by the number and complexity of widgets, images, and other resources." },
+            { letter: "C", text: "To provide a uniform user experience throughout the application", correct: true, explanation: "(Correct) Consistent layouts ensure that users have a predictable and cohesive experience, which enhances usability and user satisfaction by making navigation and interaction more intuitive." },
+            { letter: "D", text: "To simplify the database schema", correct: false, explanation: "(Incorrect) The database schema is independent of the layout design. It is more related to how data is structured and stored rather than how the user interface is presented." }
+        ],
+        generalExplanation: "Maintaining consistency across different layouts in a Mendix application is crucial for providing a uniform user experience. It ensures that users can navigate and interact with the application intuitively, which enhances usability and satisfaction."
+    },
+    {
+        question: "In Mendix, which Domain Model element allows you to restrict access to certain attributes based on user roles?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "Validation rules", correct: false, explanation: "(Incorrect) Validation rules are used to ensure that data entered into the application meets certain criteria before it is saved. They do not control access based on user roles." },
+            { letter: "B", text: "Entity access rules", correct: true, explanation: "(Correct) Entity access rules are used to restrict access to specific attributes of an entity based on user roles. This ensures that only authorized users can view or modify certain data." },
+            { letter: "C", text: "Attribute properties", correct: false, explanation: "(Incorrect) Attribute properties define the characteristics of an attribute, such as its data type and default value. They do not control access based on user roles." },
+            { letter: "D", text: "Module roles", correct: false, explanation: "(Incorrect) Module roles define the permissions for users within a specific module. While they help in managing user roles, they do not directly restrict access to specific attributes." }
+        ],
+        generalExplanation: "In Mendix, Entity access rules are used to control access to specific attributes of an entity based on user roles. This ensures that sensitive data is only accessible to authorized users, enhancing the security and integrity of the application."
+    },
+    {
+        question: "Which of the following best describes a 'transient' attribute in the context of a Mendix Domain Model?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "An attribute that is used for temporary calculations and not stored in the database", correct: true, explanation: "(Correct) This is correct because a transient attribute in Mendix is used for temporary calculations or values that do not need to be stored in the database." },
+            { letter: "B", text: "An attribute that is automatically deleted after a certain period", correct: false, explanation: "(Incorrect) This is incorrect because transient attributes are not automatically deleted after a certain period; they simply are not stored in the database." },
+            { letter: "C", text: "An attribute that increments automatically each time a new entity instance is created", correct: false, explanation: "(Incorrect) This is incorrect because such attributes are typically referred to as auto-incrementing attributes, not transient attributes." },
+            { letter: "D", text: "An attribute that is used to store temporary user sessions", correct: false, explanation: "(Incorrect) This is incorrect because transient attributes are not specifically used to store temporary user sessions; they are used for temporary values in general." }
+        ],
+        generalExplanation: "In the context of a Mendix Domain Model, a transient attribute is one that is used for temporary calculations or values and is not stored in the database. This means the data held by a transient attribute is only available during the runtime of the application and is not persisted."
+    },
+    {
+        question: "In Agile, what is the function of a Product Backlog?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "To record completed user stories", correct: false, explanation: "(Incorrect) Completed user stories are typically moved to a 'Done' column or archived in a separate location, not kept in the Product Backlog." },
+            { letter: "B", text: "To list all the technical debt items", correct: false, explanation: "(Incorrect) While technical debt items can be included in the Product Backlog, it is not its primary function. The backlog is for all features, functions, and requirements." },
+            { letter: "C", text: "To serve as a repository for stakeholder feedback", correct: false, explanation: "(Incorrect) While stakeholder feedback can inform the Product Backlog, it is not the primary purpose. The feedback is used to update or add to the backlog." },
+            { letter: "D", text: "To prioritize and list all features, functions, and requirements", correct: true, explanation: "(Correct) The Product Backlog is a prioritized list of all features, functions, and requirements needed for the product. It is continuously updated based on stakeholder feedback and team input." }
+        ],
+        generalExplanation: "The Product Backlog is a critical component in Agile methodologies, serving as a dynamic list that includes all necessary features, functions, and requirements for the product. It is continuously prioritized and updated based on feedback and changing requirements."
+    },
+    {
+        question: "What is the Mendix Developer Portal primarily used for?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "Purchasing Mendix licenses", correct: false, explanation: "Incorrect: The Mendix Developer Portal is not primarily used for purchasing licenses. Licensing is usually managed through sales or dedicated portals." },
+            { letter: "B", text: "Accessing the Mendix SDK and APIs", correct: false, explanation: "Incorrect: While the Mendix Developer Portal provides links to resources, its primary function is not to serve as the main access point for SDKs and APIs." },
+            { letter: "C", text: "Collaborating on projects and accessing resources", correct: true, explanation: "Correct: The Mendix Developer Portal is mainly used for project collaboration, team management, and accessing various development resources and documentation." },
+            { letter: "D", text: "Submitting apps for certification", correct: false, explanation: "Incorrect: Submitting apps for certification is not the primary purpose of the Mendix Developer Portal. This task is typically managed through specific channels or platforms." }
+        ],
+        generalExplanation: "The Mendix Developer Portal is a collaborative platform where developers can work on projects, manage teams, and access necessary resources and documentation. It is designed to streamline development processes and enhance team collaboration."
+    },
+    {
+        question: "In the Domain Model of a Mendix application, what is the function of the 'delete behavior' setting for an association?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "It determines how associated objects are displayed in the user interface", correct: false, explanation: "(Incorrect) This option is incorrect because the 'delete behavior' setting does not influence the display of associated objects in the user interface. It is concerned with the lifecycle of data rather than its presentation." },
+            { letter: "B", text: "It specifies the default value for attributes of the associated entities", correct: false, explanation: "(Incorrect) This option is incorrect. The 'delete behavior' setting does not deal with default values for attributes. Instead, it manages the relationships between objects when deletion occurs." },
+            { letter: "C", text: "It defines what happens to associated objects when the owning object is deleted", correct: true, explanation: "(Correct) This option is correct. The 'delete behavior' setting in Mendix specifies what actions should be taken on associated objects when the owning object is deleted, such as cascading the delete or setting the reference to null." },
+            { letter: "D", text: "It restricts the deletion of objects based on user roles", correct: false, explanation: "(Incorrect) This option is incorrect. The 'delete behavior' does not restrict deletion based on user roles. Such restrictions are typically handled by security settings and access rules within the application." }
+        ],
+        generalExplanation: "The 'delete behavior' setting in Mendix's Domain Model is crucial for managing the integrity of associations between objects. It determines the action taken on associated objects when the primary or owning object is deleted. This can include cascading deletions or setting references to null, ensuring data consistency and preventing orphaned records."
+    },
+    {
+        question: "Which of these best describes the role of the Scrum Master?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "The Scrum Master leads the development team and assigns tasks.", correct: false, explanation: "(Incorrect) The Scrum Master does not lead the team or assign tasks. Instead, the Scrum Master facilitates the Scrum process and helps remove impediments." },
+            { letter: "B", text: "The Scrum Master is the main point of contact for the client.", correct: false, explanation: "(Incorrect) The Product Owner is typically the main point of contact for the client. The Scrum Master focuses on supporting the Scrum team and ensuring the Scrum process is followed." },
+            { letter: "C", text: "The Scrum Master facilitates Scrum events and supports the team.", correct: true, explanation: "(Correct) The Scrum Master is responsible for facilitating Scrum events such as Sprint Planning, Daily Stand-ups, and Sprint Retrospectives. They also support the team by removing obstacles and promoting a productive work environment." },
+            { letter: "D", text: "The Scrum Master is responsible for the product's profitability.", correct: false, explanation: "(Incorrect) The Product Owner is responsible for the product's profitability and maximizing the value of the product. The Scrum Master focuses on the process and team facilitation." }
+        ],
+        generalExplanation: "The Scrum Master plays a crucial role in facilitating the Scrum process and supporting the development team. They are not responsible for leading the team, assigning tasks, being the main client contact, or ensuring the product's profitability. Their primary focus is on facilitating Scrum events, removing impediments, and promoting a productive work environment."
+    }
+];
+
+        // Variables de estado
+        let currentQuestion = 0;
+        let selectedOption = null;
+        let answers = Array(examData.length).fill(null);
+        let score = 0;
+        let timer;
+        let timeLeft = 60 * 60; // 60 minutos en segundos
+
+        // Elementos del DOM
+        const questionContainer = document.getElementById('question-container');
+        const resultsContainer = document.getElementById('results-container');
+        const progressBar = document.getElementById('progress');
+        const progressText = document.getElementById('progress-text');
+        const timeDisplay = document.getElementById('time');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Inicializar el examen
+        function initExam() {
+            updateQuestion();
+            startTimer();
+            
+            // Event listeners para las opciones
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    if (!answers[currentQuestion]) { // Solo permitir selección si no se ha respondido
+                        selectOption(this);
+                    }
+                });
+            });
+            
+            // Event listeners para los botones de navegación
+            document.querySelector('.btn-prev').addEventListener('click', prevQuestion);
+            document.querySelector('.btn-next').addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restartExam);
+        }
+
+        // Actualizar la pregunta actual
+        function updateQuestion() {
+            const question = examData[currentQuestion];
+            
+            // Actualizar el número de pregunta y dominio
+            document.querySelector('.question-number').textContent = `Pregunta ${currentQuestion + 1}`;
+            document.querySelector('.domain-tag').textContent = question.domain;
+            
+            // Actualizar el texto de la pregunta
+            document.querySelector('.question-text').textContent = question.question;
+            
+            // Actualizar las opciones
+            const options = document.querySelectorAll('.option');
+            question.options.forEach((option, index) => {
+                options[index].querySelector('.option-text').textContent = option.text;
+                options[index].className = 'option';
+                options[index].classList.add('fade-in');
+                
+                // Marcar si ya fue respondida
+                if (answers[currentQuestion] === option.letter) {
+                    options[index].classList.add('selected');
+                    if (option.correct) {
+                        options[index].classList.add('correct');
+                    } else {
+                        options[index].classList.add('incorrect');
+                    }
+                }
+            });
+            
+            // Actualizar feedback si ya fue respondida
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback-container';
+            
+            if (answers[currentQuestion] !== null) {
+                const selected = question.options.find(opt => opt.letter === answers[currentQuestion]);
+                if (selected.correct) {
+                    feedback.classList.add('correct-feedback', 'show');
+                    feedback.querySelector('.feedback-header i').className = 'fas fa-check-circle';
+                    feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es correcta';
+                } else {
+                    feedback.classList.add('incorrect-feedback', 'show');
+                    feedback.querySelector('.feedback-header i').className = 'fas fa-times-circle';
+                    feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es incorrecta';
+                }
+                
+                feedback.querySelector('.explanation').textContent = selected.explanation;
+                feedback.querySelector('.general-explanation').textContent = question.generalExplanation;
+            }
+            
+            // Actualizar progreso
+            progressBar.value = currentQuestion + 1;
+            progressText.textContent = `${currentQuestion + 1}/${examData.length}`;
+            
+            // Actualizar botones de navegación
+            document.querySelector('.btn-prev').disabled = currentQuestion === 0;
+            
+            if (currentQuestion === examData.length - 1) {
+                document.querySelector('.btn-next').className = 'btn-submit';
+                document.querySelector('.btn-next').innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Examen';
+            } else {
+                document.querySelector('.btn-next').className = 'btn-next';
+                document.querySelector('.btn-next').innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+            }
+        }
+
+        // Seleccionar una opción
+        function selectOption(optionElement) {
+            // Deseleccionar cualquier opción previa
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Seleccionar la nueva opción
+            optionElement.classList.add('selected');
+            selectedOption = optionElement.getAttribute('data-option');
+            
+            // Guardar la respuesta
+            answers[currentQuestion] = selectedOption;
+            
+            // Mostrar feedback
+            const question = examData[currentQuestion];
+            const selected = question.options.find(opt => opt.letter === selectedOption);
+            const feedback = document.getElementById('feedback');
+            
+            feedback.className = 'feedback-container show';
+            if (selected.correct) {
+                feedback.classList.add('correct-feedback');
+                feedback.querySelector('.feedback-header i').className = 'fas fa-check-circle';
+                feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es correcta';
+                score++;
+            } else {
+                feedback.classList.add('incorrect-feedback');
+                feedback.querySelector('.feedback-header i').className = 'fas fa-times-circle';
+                feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es incorrecta';
+                
+                // Resaltar la respuesta correcta
+                const correctOption = document.querySelector(`.option[data-option="${question.options.find(opt => opt.correct).letter}"]`);
+                correctOption.classList.add('correct');
+            }
+            
+            feedback.querySelector('.explanation').textContent = selected.explanation;
+            feedback.querySelector('.general-explanation').textContent = question.generalExplanation;
+        }
+
+        // Navegar a la pregunta anterior
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                updateQuestion();
+            }
+        }
+
+        // Navegar a la siguiente pregunta
+        function nextQuestion() {
+            if (currentQuestion < examData.length - 1) {
+                currentQuestion++;
+                updateQuestion();
+            } else {
+                finishExam();
+            }
+        }
+
+        // Finalizar el examen
+        function finishExam() {
+            clearInterval(timer);
+            
+            // Calcular puntaje
+            const correctAnswers = answers.reduce((count, answer, index) => {
+                if (answer) {
+                    const question = examData[index];
+                    const selected = question.options.find(opt => opt.letter === answer);
+                    return count + (selected.correct ? 1 : 0);
+                }
+                return count;
+            }, 0);
+            
+            const percentage = Math.round((correctAnswers / examData.length) * 100);
+            
+            // Mostrar resultados
+            questionContainer.style.display = 'none';
+            resultsContainer.classList.add('show', 'fade-in');
+            
+            document.querySelector('.results-score').textContent = `${percentage}%`;
+            document.querySelector('.correct-stat .stat-number').textContent = correctAnswers;
+            document.querySelector('.incorrect-stat .stat-number').textContent = examData.length - correctAnswers;
+            
+            // Cambiar icono según el puntaje
+            const resultsIcon = document.querySelector('.results-icon');
+            if (percentage >= 80) {
+                resultsIcon.className = 'results-icon success-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-trophy"></i>';
+                document.querySelector('.results-title').textContent = '¡Excelente trabajo!';
+            } else if (percentage >= 60) {
+                resultsIcon.className = 'results-icon warning-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-award"></i>';
+                document.querySelector('.results-title').textContent = '¡Buen trabajo!';
+            } else {
+                resultsIcon.className = 'results-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-book"></i>';
+                document.querySelector('.results-title').textContent = '¡Sigue practicando!';
+            }
+        }
+
+        // Reiniciar el examen
+        function restartExam() {
+            currentQuestion = 0;
+            selectedOption = null;
+            answers = Array(examData.length).fill(null);
+            score = 0;
+            timeLeft = 60 * 60;
+            
+            resultsContainer.classList.remove('show');
+            questionContainer.style.display = 'block';
+            
+            updateQuestion();
+            startTimer();
+        }
+
+        // Temporizador
+        function startTimer() {
+            clearInterval(timer);
+            updateTimerDisplay();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Cambiar color cuando quedan 5 minutos
+            if (timeLeft <= 300) { // 5 minutos = 300 segundos
+                timeDisplay.style.color = 'var(--error-color)';
+            }
+        }
+
+        // Iniciar la aplicación
+        initExam();
+    </script>
+</body>
+</html>
