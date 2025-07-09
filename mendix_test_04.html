@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Examen Mendix</title>
+    <style>
+        :root {
+            --primary-color: #571010;
+            --secondary-color: #FF6B00;
+            --accent-color: #97574e;
+            --light-color: #F5F7FA;
+            --dark-color: #2D3748;
+            --success-color: #48BB78;
+            --error-color: #F56565;
+            --warning-color: #ED8936;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .exam-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: white;
+            padding: 15px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: var(--light-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .timer i {
+            margin-right: 10px;
+        }
+        
+        .progress-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .progress-text {
+            margin-right: 15px;
+            font-weight: 500;
+        }
+        
+        progress {
+            width: 200px;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        progress::-webkit-progress-bar {
+            background-color: var(--light-color);
+            border-radius: 10px;
+        }
+        
+        progress::-webkit-progress-value {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+        }
+        
+        .question-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        
+        .question-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .domain-tag {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .options-container {
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: var(--light-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background-color: #E2E8F0;
+        }
+        
+        .option.selected {
+            background-color: #EBF8FF;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .option.correct {
+            background-color: #F0FFF4;
+            border: 2px solid var(--success-color);
+        }
+        
+        .option.incorrect {
+            background-color: #FFF5F5;
+            border: 2px solid var(--error-color);
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: white;
+        }
+        
+        .selected .option-letter {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .correct .option-letter {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .incorrect .option-letter {
+            background-color: var(--error-color);
+            color: white;
+        }
+        
+        .option-text {
+            flex-grow: 1;
+        }
+        
+        .feedback-container {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .feedback-container.show {
+            display: block;
+        }
+        
+        .correct-feedback {
+            background-color: #F0FFF4;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .incorrect-feedback {
+            background-color: #FFF5F5;
+            border-left: 5px solid var(--error-color);
+        }
+        
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .feedback-header i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .correct-feedback .feedback-header {
+            color: var(--success-color);
+        }
+        
+        .incorrect-feedback .feedback-header {
+            color: var(--error-color);
+        }
+        
+        .explanation {
+            margin-bottom: 10px;
+        }
+        
+        .general-explanation {
+            font-style: italic;
+            color: #4A5568;
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .btn-prev {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-prev:hover {
+            background-color: #EBF8FF;
+        }
+        
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-next:hover {
+            background-color: #d48721;
+        }
+        
+        .btn-submit {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-submit:hover {
+            background-color: #E05A00;
+        }
+        
+        .results-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .results-container.show {
+            display: block;
+        }
+        
+        .results-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .success-icon {
+            color: var(--success-color);
+        }
+        
+        .warning-icon {
+            color: var(--warning-color);
+        }
+        
+        .results-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+        
+        .results-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .results-details {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .result-stat {
+            margin: 0 15px;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+        
+        .correct-stat {
+            background-color: #F0FFF4;
+            color: var(--success-color);
+        }
+        
+        .incorrect-stat {
+            background-color: #FFF5F5;
+            color: var(--error-color);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .btn-restart {
+            background-color: var(--accent-color);
+            color: white;
+            margin: 0 auto;
+        }
+        
+        .btn-restart:hover {
+            background-color: #00A3B5;
+        }
+        
+        @media (max-width: 768px) {
+            .exam-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .progress-container {
+                margin-top: 15px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .timer {
+                margin-bottom: 15px;
+            }
+            
+            .results-details {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .result-stat {
+                margin: 10px 0;
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Examen Mendix</h1>
+            <p>Practica para tu certificación con este examen interactivo</p>
+        </header>
+        
+        <div class="exam-info">
+            <div class="timer">
+                <i class="fas fa-clock"></i>
+                <span id="time">60:00</span>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text">Progreso:</span>
+                <progress id="progress" value="1" max="50"></progress>
+                <span id="progress-text">1/50</span>
+            </div>
+        </div>
+        
+        <div id="question-container" class="question-container fade-in">
+            <div class="question-header">
+                <span class="question-number">Pregunta 1</span>
+                <span class="domain-tag">Security</span>
+            </div>
+            
+            <div class="question-text">
+                When setting up security for a Mendix application, what is the purpose of 'User role inheritance'?
+            </div>
+            
+            <div class="options-container">
+                <div class="option" data-option="A">
+                    <span class="option-letter">A</span>
+                    <div class="option-text">To allow user roles to inherit access rights from other roles.</div>
+                </div>
+                <div class="option" data-option="B">
+                    <span class="option-letter">B</span>
+                    <div class="option-text">To automatically assign new users to existing roles.</div>
+                </div>
+                <div class="option" data-option="C">
+                    <span class="option-letter">C</span>
+                    <div class="option-text">To create a backup role in case the primary role is deleted.</div>
+                </div>
+                <div class="option" data-option="D">
+                    <span class="option-letter">D</span>
+                    <div class="option-text">To duplicate permissions for creating new, similar roles.</div>
+                </div>
+            </div>
+            
+            <div id="feedback" class="feedback-container">
+                <div class="feedback-header">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Tu respuesta es correcta</span>
+                </div>
+                <div class="explanation">
+                    (Correct) This option is correct because user role inheritance in Mendix allows a user role to inherit permissions and access rights from another role, simplifying the management of user permissions.
+                </div>
+                <div class="general-explanation">
+                    User role inheritance in Mendix is a feature that allows a user role to inherit permissions and access rights from another role. This simplifies the management of user permissions by reducing redundancy and ensuring consistency across different user roles.
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="btn-prev" disabled>
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn-next">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="results-container" class="results-container">
+            <div class="results-icon success-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="results-title">¡Examen Completado!</h2>
+            <div class="results-score">85%</div>
+            
+            <div class="results-details">
+                <div class="result-stat correct-stat">
+                    <div class="stat-number">42</div>
+                    <div>Correctas</div>
+                </div>
+                <div class="result-stat incorrect-stat">
+                    <div class="stat-number">8</div>
+                    <div>Incorrectas</div>
+                </div>
+            </div>
+            
+            <button class="btn-restart" id="restart-btn">
+                <i class="fas fa-redo"></i> Reiniciar Examen
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Datos del examen
+        const examData = [
+    {
+        question: "Where in the Mendix platform can user roles be defined and managed?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "In the Domain Model editor", correct: false, explanation: "(Incorrect) The Domain Model editor is used to define the data structure of your application. It does not handle user roles or security settings." },
+            { letter: "B", text: "In the Security section of the Project settings", correct: true, explanation: "(Correct) The Security section of the Project settings in Mendix is where user roles are defined and managed. This is the appropriate place to configure security settings for the application." },
+            { letter: "C", text: "In the Marketplace module", correct: false, explanation: "(Incorrect) The Marketplace module is where you can find and integrate reusable components and modules into your Mendix application. It is not related to user role management." },
+            { letter: "D", text: "In the Feedback management console", correct: false, explanation: "(Incorrect) The Feedback management console is used to manage feedback and issues reported by users. It does not deal with user roles or security settings." }
+        ],
+        generalExplanation: "In Mendix, user roles are defined and managed in the Security section of the Project settings. This section allows you to configure various security aspects of your application, including user roles, permissions, and access controls. The other options provided do not relate to user role management in Mendix."
+    },
+    {
+        question: "What is the function of the 'Unique' validation rule in Mendix?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "It ensures that an attribute value is repeated across all objects", correct: false, explanation: "(Incorrect) This option describes the opposite of uniqueness. Ensuring an attribute value is repeated across all objects is not related to the 'Unique' validation rule." },
+            { letter: "B", text: "It confirms that an attribute value is different for each object", correct: true, explanation: "(Correct) The 'Unique' validation rule in Mendix ensures that each object in the database has a different value for the specified attribute, preventing duplicate values." },
+            { letter: "C", text: "It checks that an attribute value is not null or empty", correct: false, explanation: "(Incorrect) This option describes a different type of validation, ensuring that an attribute has a value, but it does not pertain to uniqueness." },
+            { letter: "D", text: "It validates that an attribute value falls within a specified range", correct: false, explanation: "(Incorrect) This option describes range validation, which ensures that an attribute's value falls within a certain range, not that it is unique." }
+        ],
+        generalExplanation: "The 'Unique' validation rule in Mendix ensures that each object in the database has a unique value for a specified attribute, preventing any duplicates. This is critical for maintaining data integrity, especially for attributes like usernames or email addresses."
+    },
+    {
+        question: "What is the role of 'placeholders' in Mendix page design?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "To temporarily store data values for calculations", correct: false, explanation: "(Incorrect) Placeholders in Mendix page design are not used for storing data values temporarily for calculations. This function is typically handled by variables or attributes in microflows or data models." },
+            { letter: "B", text: "To hold a space within a layout where content can be dynamically inserted", correct: true, explanation: "(Correct) Placeholders in Mendix are used to reserve space within a page layout where content can be dynamically inserted, such as widgets or other page elements." },
+            { letter: "C", text: "To mark locations in the Domain Model for future entity placement", correct: false, explanation: "(Incorrect) Placeholders do not mark locations in the Domain Model for future entity placement. The Domain Model itself is designed to define and organize data entities." },
+            { letter: "D", text: "To serve as temporary variables in microflows", correct: false, explanation: "(Incorrect) Placeholders are not used as temporary variables in microflows. Microflows use variables and parameters to handle temporary data storage and manipulation." }
+        ],
+        generalExplanation: "In Mendix page design, placeholders are used to reserve space within a layout where content can be dynamically inserted. This allows for flexible and dynamic page designs, enabling developers to insert different types of widgets or page elements as needed."
+    },
+    {
+        question: "In a Mendix app, what type of association should be used to represent a scenario where a Customer can have multiple Orders, but each Order is linked to only one Customer?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "One-to-One Association", correct: false, explanation: "(Incorrect) A one-to-one association means each Customer would be linked to exactly one Order, which does not fit the scenario where a Customer can have multiple Orders." },
+            { letter: "B", text: "One-to-Many Association", correct: true, explanation: "(Correct) A one-to-many association allows a single Customer to have multiple Orders, while each Order is linked to only one Customer, accurately representing the described scenario." },
+            { letter: "C", text: "Many-to-Many Association", correct: false, explanation: "(Incorrect) A many-to-many association would mean that multiple Customers could be linked to multiple Orders, which is not the case in the given scenario." },
+            { letter: "D", text: "Self-Association", correct: false, explanation: "(Incorrect) A self-association links instances of the same entity, which is not relevant to the relationship between Customers and Orders." }
+        ],
+        generalExplanation: "The correct association type for a scenario where a Customer can have multiple Orders, but each Order is linked to only one Customer, is a one-to-many association. This ensures that one Customer can be associated with multiple Orders while maintaining a single link from each Order back to one Customer."
+    },
+    {
+        question: "In Mendix, what term is used to describe the links established between different entities?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "Entity Ties", correct: false, explanation: "Incorrect: 'Entity Ties' is not a standard term used in Mendix to describe links between entities. It is not recognized terminology within the Mendix platform." },
+            { letter: "B", text: "Entity Relations", correct: false, explanation: "Incorrect: While 'Entity Relations' might seem intuitive, the correct term within Mendix is 'Entity Associations'. 'Entity Relations' is not the official term used." },
+            { letter: "C", text: "Entity Associations", correct: true, explanation: "Correct: 'Entity Associations' is the term used in Mendix to describe the links established between different entities. This is the standard terminology in the Mendix platform." },
+            { letter: "D", text: "Entity Bindings", correct: false, explanation: "Incorrect: 'Entity Bindings' is not a term used in Mendix to describe the relationships between entities. The correct term is 'Entity Associations'." }
+        ],
+        generalExplanation: "In Mendix, the term 'Entity Associations' is used to describe the links established between different entities. This term is specific to the Mendix platform and is essential for defining relationships and interactions between entities within the application model."
+    },
+    {
+        question: "Which of the following is NOT an attribute type available in a Mendix Domain Model?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "AutoNumber", correct: false, explanation: "(Correct) AutoNumber is a valid attribute type in Mendix Domain Models. It is used to generate a unique, sequential number automatically for each new record." },
+            { letter: "B", text: "Binary", correct: false, explanation: "(Correct) Binary is a valid attribute type in Mendix Domain Models. It is used to store binary data like files or images." },
+            { letter: "C", text: "HashString", correct: true, explanation: "(Incorrect) HashString is NOT a valid attribute type in Mendix Domain Models. Mendix does not support an attribute type specifically named 'HashString'." },
+            { letter: "D", text: "DateTime", correct: false, explanation: "(Correct) DateTime is a valid attribute type in Mendix Domain Models. It is used to store date and time information." }
+        ],
+        generalExplanation: "In Mendix Domain Models, various attribute types are available to define the data structure. AutoNumber, Binary, and DateTime are valid attribute types, while HashString is not a recognized attribute type in Mendix. Understanding the correct attribute types is crucial for effective data modeling in Mendix."
+    },
+    {
+        question: "How does Mendix handle the creation of a primary key for an entity in the Domain Model?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "The primary key is set manually by the developer for each entity", correct: false, explanation: "(Incorrect) Mendix does not require developers to manually set a primary key for each entity. Instead, it automates this process." },
+            { letter: "B", text: "Mendix automatically creates a unique 'ID' attribute for each entity", correct: true, explanation: "(Correct) Mendix automatically generates a unique 'ID' attribute for every entity in the Domain Model, ensuring that each instance can be uniquely identified." },
+            { letter: "C", text: "The primary key is determined by the first attribute of the entity", correct: false, explanation: "(Incorrect) The primary key is not determined by the first attribute of the entity. Mendix uses a system-generated 'ID' attribute as the primary key." },
+            { letter: "D", text: "Mendix prompts the user to select an attribute as the primary key when creating the entity", correct: false, explanation: "(Incorrect) Mendix does not prompt the user to select a primary key attribute. It automatically creates an 'ID' attribute for this purpose." }
+        ],
+        generalExplanation: "In Mendix, the primary key for an entity in the Domain Model is automatically managed by the platform. Specifically, Mendix generates a unique 'ID' attribute for each entity, which serves as the primary key. This automation simplifies the development process and ensures consistency across the application."
+    },
+    {
+        question: "Which Mendix resource is specifically designed for learning and mastering Mendix skills?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "Mendix Developer Portal", correct: false, explanation: "(Incorrect) The Mendix Developer Portal is primarily for managing projects, collaborating with team members, and tracking app development progress, rather than specifically for learning and mastering Mendix skills." },
+            { letter: "B", text: "Mendix Community Answers", correct: false, explanation: "(Incorrect) Mendix Community Answers is a forum where developers can ask questions and share solutions. While useful for problem-solving, it is not designed specifically for structured learning." },
+            { letter: "C", text: "Mendix Academy", correct: true, explanation: "(Correct) Mendix Academy offers structured courses, tutorials, and certifications specifically designed to help users learn and master Mendix skills, making it the best resource for this purpose." },
+            { letter: "D", text: "Mendix Documentation", correct: false, explanation: "(Incorrect) Mendix Documentation provides detailed technical information and guides on Mendix features and functionalities, but it is not structured as a learning platform." }
+        ],
+        generalExplanation: "For learning and mastering Mendix skills, the best resource is Mendix Academy. It provides a structured learning path, including tutorials, courses, and certifications, designed to help users become proficient in Mendix. Other resources like the Developer Portal, Community Answers, and Documentation are useful for specific needs but do not offer the same comprehensive learning experience."
+    },
+    {
+        question: "In Mendix, how can you prevent a user from accessing a microflow that is not relevant to their user role?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Delete the microflow from the project.", correct: false, explanation: "(Incorrect) Deleting the microflow removes it entirely from the project, making it unavailable for all users, not just those with specific roles." },
+            { letter: "B", text: "Set the microflow to 'Private' in its properties.", correct: false, explanation: "(Incorrect) Setting the microflow to 'Private' restricts its use to within the same module, but it does not control access based on user roles." },
+            { letter: "C", text: "Restrict the microflow execution to specific user roles in security settings.", correct: true, explanation: "(Correct) This option allows you to control which user roles can execute the microflow, ensuring that only relevant users have access." },
+            { letter: "D", text: "Use a nanoflow instead of a microflow.", correct: false, explanation: "(Incorrect) Switching to a nanoflow does not inherently restrict access based on user roles; it simply changes the type of flow." }
+        ],
+        generalExplanation: "To prevent users from accessing a microflow that is not relevant to their role, you should use the security settings to restrict microflow execution to specific user roles. This ensures that only authorized users can execute the microflow, maintaining the integrity and security of your application."
+    },
+    {
+        question: "Which association in Mendix ensures that for every instance of Entity A, there can be zero or one associated instance of Entity B?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "Many-to-Many Association", correct: false, explanation: "(Incorrect) This type of association allows multiple instances of Entity A to be associated with multiple instances of Entity B, which does not ensure zero or one instance of Entity B for each instance of Entity A." },
+            { letter: "B", text: "One-to-One Association", correct: false, explanation: "(Incorrect) While this association ensures that each instance of Entity A is associated with exactly one instance of Entity B, it does not account for the possibility of zero instances." },
+            { letter: "C", text: "Optional One-to-One Association", correct: true, explanation: "(Correct) This association ensures that for every instance of Entity A, there can be zero or one associated instance of Entity B, meeting the criteria specified in the question." },
+            { letter: "D", text: "One-to-Many Association", correct: false, explanation: "(Incorrect) This association allows one instance of Entity A to be associated with multiple instances of Entity B, which does not fit the requirement of having zero or one instance." }
+        ],
+        generalExplanation: "The correct association to ensure that for every instance of Entity A, there can be zero or one associated instance of Entity B is the Optional One-to-One Association. This type of association allows for the possibility of no associated instance, while also permitting a single associated instance, meeting the criteria specified in the question."
+    },
+    {
+        question: "How long is a standard Sprint duration in Mendix?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "1 week", correct: false, explanation: "(Incorrect) While some teams might choose a 1-week sprint, the standard practice in Mendix and many agile frameworks is typically longer to allow for more substantial progress and review." },
+            { letter: "B", text: "2 weeks", correct: true, explanation: "(Correct) A 2-week sprint is the most common duration in Mendix as it balances the need for frequent feedback with sufficient time to complete meaningful work." },
+            { letter: "C", text: "4 weeks", correct: false, explanation: "(Incorrect) A 4-week sprint is generally considered too long for most agile methodologies, including Mendix, as it delays feedback and adjustments." },
+            { letter: "D", text: "6 weeks", correct: false, explanation: "(Incorrect) A 6-week sprint is far too long for agile practices, including Mendix, as it significantly delays feedback cycles and can hinder agility." }
+        ],
+        generalExplanation: "In agile methodologies, including Mendix, the sprint duration is crucial for maintaining a balance between progress and feedback. The standard sprint duration in Mendix is typically 2 weeks, as it allows for efficient progress tracking and iterative improvements while keeping the team agile and responsive to changes."
+    },
+    {
+        question: "Which platform is integrated with Mendix for seamless Online Project Management?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "Mendix Project Dashboard", correct: false, explanation: "(Incorrect) The Mendix Project Dashboard is a tool for monitoring and visualizing project progress but is not specifically integrated for seamless online project management." },
+            { letter: "B", text: "Mendix Team Server", correct: true, explanation: "(Correct) The Mendix Team Server is integrated for seamless online project management, providing version control and collaboration features for development teams." },
+            { letter: "C", text: "Mendix App Platform", correct: false, explanation: "(Incorrect) The Mendix App Platform is a comprehensive environment for building, deploying, and managing applications but does not specifically focus on project management integration." },
+            { letter: "D", text: "Mendix Feedback Management", correct: false, explanation: "(Incorrect) Mendix Feedback Management is a tool for collecting and managing feedback from users but does not provide comprehensive project management capabilities." }
+        ],
+        generalExplanation: "The Mendix Team Server is the correct platform integrated for seamless online project management. It offers tools for version control, collaboration, and team management, making it essential for managing development projects within the Mendix ecosystem."
+    },
+    {
+        question: "Prior to implementing validation constraints, which element is essential to have in your domain model?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "An entity with attributes defined", correct: true, explanation: "(Correct) An entity with attributes defined is essential for implementing validation constraints. Without attributes, there would be nothing to validate." },
+            { letter: "B", text: "A microflow with an error handler", correct: false, explanation: "(Incorrect) A microflow with an error handler can handle errors but is not necessary for defining validation constraints in the domain model." },
+            { letter: "C", text: "A nanoflow connected to the entity", correct: false, explanation: "(Incorrect) A nanoflow can be used for client-side logic but is not essential for defining validation constraints in the domain model." },
+            { letter: "D", text: "A user role with read/write access", correct: false, explanation: "(Incorrect) User roles with read/write access are important for security but are not essential for defining validation constraints in the domain model." }
+        ],
+        generalExplanation: "For implementing validation constraints in a domain model, it is essential to have an entity with attributes defined. This is because validation constraints apply directly to the attributes of the entity, ensuring data integrity and consistency."
+    },
+    {
+        question: "What is the purpose of using a 'Layout grid' widget when designing a page in Mendix?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "To create a fixed set of rows and columns for placing widgets", correct: true, explanation: "(Correct) The Layout grid widget in Mendix is used to create a structured layout by defining a fixed set of rows and columns. This helps in organizing and placing other widgets on the page in a systematic manner." },
+            { letter: "B", text: "To define user roles and permissions for the page", correct: false, explanation: "(Incorrect) Defining user roles and permissions is not related to the Layout grid widget. This task is typically handled through the security settings in Mendix, not through layout widgets." },
+            { letter: "C", text: "To establish a connection to an external database", correct: false, explanation: "(Incorrect) Establishing a connection to an external database is a backend task and is not related to the Layout grid widget. This would be configured through the database connection settings in Mendix." },
+            { letter: "D", text: "To schedule events within the application's calendar", correct: false, explanation: "(Incorrect) Scheduling events within an application's calendar is a functionality that would typically be handled by specific calendar or scheduling widgets, not by the Layout grid widget." }
+        ],
+        generalExplanation: "The Layout grid widget in Mendix is specifically designed to help developers create a structured and organized layout by defining rows and columns. This makes it easier to place and align other widgets on the page, ensuring a clean and consistent design. It does not handle user roles, database connections, or event scheduling."
+    },
+    {
+        question: "For an input widget to initiate a microflow upon changing from 'no selection' to a specific selection, which event type should be used?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "On change", correct: true, explanation: "(Correct) This event triggers when the value of the input widget changes, making it ideal for initiating a microflow upon changing from 'no selection' to a specific selection." },
+            { letter: "B", text: "On enter", correct: false, explanation: "(Incorrect) This event triggers when the user enters the input field, which does not necessarily indicate a change in selection." },
+            { letter: "C", text: "On leave", correct: false, explanation: "(Incorrect) This event triggers when the user leaves the input field, which does not guarantee that a selection has been made or changed." },
+            { letter: "D", text: "On click", correct: false, explanation: "(Incorrect) This event triggers when the input field is clicked, but it does not ensure that a selection has been changed." }
+        ],
+        generalExplanation: "To initiate a microflow upon changing from 'no selection' to a specific selection in an input widget, the 'On change' event is appropriate. This event ensures that the microflow is triggered only when the value of the widget changes, which is the desired behavior in this context."
+    },
+    {
+        question: "What is the impact of enabling 'Demo users' in the security settings of a Mendix application?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Demo users have unrestricted access to all app features.", correct: false, explanation: "(Incorrect) Demo users do not have unrestricted access. Their access is typically limited to predefined roles and permissions for testing purposes." },
+            { letter: "B", text: "Demo users are temporary users that can be used for testing purposes.", correct: true, explanation: "(Correct) Demo users are indeed temporary users created for testing purposes. They allow developers and testers to simulate user interactions without affecting real user data." },
+            { letter: "C", text: "Demo user accounts are automatically deleted after each session.", correct: false, explanation: "(Incorrect) Demo user accounts are not automatically deleted after each session. They persist until manually deleted or the demo mode is disabled." },
+            { letter: "D", text: "Demo users bypass all security mechanisms in the application.", correct: false, explanation: "(Incorrect) Demo users do not bypass security mechanisms. They are subject to the same security constraints as regular users, based on their assigned roles." }
+        ],
+        generalExplanation: "Enabling 'Demo users' in a Mendix application allows the creation of temporary user accounts for testing purposes. These users are subject to predefined roles and permissions, ensuring they do not have unrestricted access or bypass security mechanisms. Demo users are not automatically deleted after each session."
+    },
+    {
+        question: "What is the function of the 'on change' event for an attribute in a Mendix Domain Model?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "To trigger a microflow when the attribute's default value is set", correct: false, explanation: "(Incorrect) The 'on change' event does not trigger a microflow when the attribute's default value is set. It is specifically for when the attribute's value is modified." },
+            { letter: "B", text: "To execute a microflow whenever the attribute's value is modified", correct: true, explanation: "(Correct) The 'on change' event is designed to execute a microflow whenever the attribute's value is modified. This allows for dynamic responses to changes in data." },
+            { letter: "C", text: "To validate the attribute's value against a set of regular expressions", correct: false, explanation: "(Incorrect) Validation against regular expressions is not the function of the 'on change' event. This is typically handled by validation rules or custom logic within microflows." },
+            { letter: "D", text: "To update the attribute's value based on changes to another attribute", correct: false, explanation: "(Incorrect) While this can be achieved through microflows, the 'on change' event itself does not directly update an attribute based on changes to another attribute." }
+        ],
+        generalExplanation: "The 'on change' event in a Mendix Domain Model is used to execute a microflow whenever the value of an attribute is modified. This feature allows developers to implement custom logic that responds dynamically to changes in data, ensuring that the application behaves as expected whenever data is altered."
+    },
+    {
+        question: "Which event signifies the commencement of a new Sprint in Scrum?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "The Sprint Review", correct: false, explanation: "(Incorrect) The Sprint Review marks the end of the Sprint where the team demonstrates what has been accomplished during the Sprint." },
+            { letter: "B", text: "The Sprint Retrospective", correct: false, explanation: "(Incorrect) The Sprint Retrospective occurs after the Sprint Review and before the next Sprint Planning Meeting. It is a meeting for the team to reflect on the past Sprint and identify improvements." },
+            { letter: "C", text: "The Sprint Planning Meeting", correct: true, explanation: "(Correct) The Sprint Planning Meeting signifies the commencement of a new Sprint. During this meeting, the team plans the work to be performed during the upcoming Sprint." },
+            { letter: "D", text: "The Daily Scrum", correct: false, explanation: "(Incorrect) The Daily Scrum is a short, daily meeting for the team to synchronize activities and create a plan for the next 24 hours. It occurs every day during the Sprint." }
+        ],
+        generalExplanation: "In Scrum, the Sprint Planning Meeting is the event that signifies the start of a new Sprint. During this meeting, the team collaborates to define the work to be done in the upcoming Sprint, ensuring everyone is aligned on the Sprint Goal and tasks."
+    },
+    {
+        question: "What follows the 'Design' phase in the Mendix Application Lifecycle Management process?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "Requirement Gathering", correct: false, explanation: "(Incorrect) Requirement Gathering is an initial phase where the needs and conditions for the project are collected. It precedes the Design phase." },
+            { letter: "B", text: "Development", correct: true, explanation: "(Correct) Following the Design phase, the Development phase involves the actual creation and coding of the application based on the design specifications." },
+            { letter: "C", text: "Quality Assurance", correct: false, explanation: "(Incorrect) Quality Assurance comes after Development to ensure that the application meets the required standards and is free of defects." },
+            { letter: "D", text: "Release and Deployment", correct: false, explanation: "(Incorrect) Release and Deployment is the final phase where the application is delivered to the end-users. It follows Quality Assurance." }
+        ],
+        generalExplanation: "In the Mendix Application Lifecycle Management process, the phase that follows the 'Design' phase is 'Development'. This phase focuses on building the application as per the design specifications. Subsequent phases include Quality Assurance and Release and Deployment."
+    },
+    {
+        question: "In a microflow, if you encounter a decision node with the expression $Order/TotalAmount > 1000, what are the possible outcomes?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "The microflow continues if the total amount is less than or equal to 1000", correct: false, explanation: "(Incorrect) This option is wrong because the expression $Order/TotalAmount > 1000 is used to evaluate if the total amount is greater than 1000. The microflow would not continue solely based on the amount being less than or equal to 1000." },
+            { letter: "B", text: "The microflow branches into two paths: one for when the total amount is greater than 1000, and another for when it is not", correct: true, explanation: "(Correct) This option is correct because a decision node with the expression $Order/TotalAmount > 1000 will branch the microflow into two paths: one where the condition is true (total amount > 1000) and another where it is false (total amount <= 1000)." },
+            { letter: "C", text: "The microflow stops executing because the expression is invalid", correct: false, explanation: "(Incorrect) This option is wrong because the expression $Order/TotalAmount > 1000 is a valid condition. The microflow will not stop executing due to this expression." },
+            { letter: "D", text: "The microflow will only continue if the total amount is exactly 1000", correct: false, explanation: "(Incorrect) This option is wrong because the expression checks if the total amount is greater than 1000, not if it is exactly 1000. The microflow will continue based on whether the condition is true or false." }
+        ],
+        generalExplanation: "In a microflow, a decision node with the expression $Order/TotalAmount > 1000 will evaluate whether the total amount is greater than 1000. Based on this evaluation, the microflow will branch into two paths: one for when the total amount is greater than 1000 and another for when it is not. This allows the microflow to handle different scenarios based on the condition."
+    },
+    {
+        question: "In a user story, what essential element must be articulated clearly?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "The coding requirements", correct: false, explanation: "(Incorrect) Coding requirements are technical details that developers need, but they are not the core of a user story. User stories focus on what the user needs or benefits from, not how it is implemented." },
+            { letter: "B", text: "The stakeholder's financial investment", correct: false, explanation: "(Incorrect) The financial investment is important for project management but is not typically part of a user story. User stories are designed to capture user needs and benefits, not financial details." },
+            { letter: "C", text: "The end-user's benefit or need", correct: true, explanation: "(Correct) User stories are centered around the end-user's benefit or need. This is the most critical element as it helps the development team understand what the user requires and why it is important." },
+            { letter: "D", text: "The project deadline", correct: false, explanation: "(Incorrect) While deadlines are crucial for project management, they are not part of a user story. User stories should focus on capturing the user's needs and benefits to guide development efforts." }
+        ],
+        generalExplanation: "User stories are a key component in Agile methodologies, designed to capture the end-user's needs and benefits. They provide context and understanding for the development team to ensure the final product meets user expectations. The correct answer is Option 3: The end-user's benefit or need."
+    },
+    {
+        question: "What is the primary role of the Product Owner in a Scrum team?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "To ensure the product is delivered on time", correct: false, explanation: "(Incorrect) While timely delivery is important, the primary role of the Product Owner is not to ensure the product is delivered on time but to maximize the value of the product." },
+            { letter: "B", text: "To manage the team's workload and assignments", correct: false, explanation: "(Incorrect) Managing the team's workload and assignments is typically the responsibility of the Scrum Master, not the Product Owner." },
+            { letter: "C", text: "To maximize the value of the product being developed", correct: true, explanation: "(Correct) The primary role of the Product Owner is to maximize the value of the product by managing the product backlog, prioritizing features, and ensuring that the development team understands the requirements." },
+            { letter: "D", text: "To provide technical guidance and code reviews", correct: false, explanation: "(Incorrect) Providing technical guidance and code reviews is typically the role of the development team members or a technical lead, not the Product Owner." }
+        ],
+        generalExplanation: "In a Scrum team, the Product Owner is responsible for maximizing the value of the product. This involves managing the product backlog, prioritizing tasks, and ensuring that the development team understands what needs to be developed to meet user needs and business goals."
+    },
+    {
+        question: "In a Mendix Domain Model, what does an association with a '0..*' multiplicity indicate?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "The association is optional and one entity can be associated with zero or more instances of another entity", correct: true, explanation: "(Correct) This is the correct interpretation of '0..*' multiplicity, indicating that the association is optional and one entity can be linked to zero or more instances of another entity." },
+            { letter: "B", text: "The association is mandatory and one entity can be associated with zero or more instances of another entity", correct: false, explanation: "(Incorrect) This option is incorrect because '0..*' indicates that the association is optional, not mandatory." },
+            { letter: "C", text: "The association is optional and one entity can be associated with exactly zero instances of another entity", correct: false, explanation: "(Incorrect) This option is incorrect because '0..*' means zero or more instances, not exactly zero." },
+            { letter: "D", text: "The association is mandatory and one entity can be associated with exactly one instance of another entity", correct: false, explanation: "(Incorrect) This option is incorrect because '0..*' does not indicate a mandatory association nor does it limit the association to exactly one instance." }
+        ],
+        generalExplanation: "In a Mendix Domain Model, an association with a '0..*' multiplicity indicates that the association is optional and that one entity can be associated with zero or more instances of another entity. This is a common way to represent a one-to-many relationship where the presence of the related entity is not required."
+    },
+    {
+        question: "Which Mendix feature allows for the automated testing of applications?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "Mendix Test Suite", correct: true, explanation: "(Correct) Mendix Test Suite is specifically designed for automated testing of Mendix applications, enabling developers to ensure their apps function correctly without manual intervention." },
+            { letter: "B", text: "Mendix Automated Builder", correct: false, explanation: "(Incorrect) Mendix Automated Builder is not a feature for automated testing. It is intended for automating the build and deployment processes of Mendix applications." },
+            { letter: "C", text: "Mendix App Debugger", correct: false, explanation: "(Incorrect) Mendix App Debugger is used for debugging applications, allowing developers to identify and fix issues in their apps, but it does not provide automated testing capabilities." },
+            { letter: "D", text: "Mendix Quality Monitor", correct: false, explanation: "(Incorrect) Mendix Quality Monitor is a tool for assessing the quality of Mendix applications by analyzing various metrics, but it does not automate the testing process." }
+        ],
+        generalExplanation: "The correct answer is Option 1: Mendix Test Suite. This feature allows developers to automate the testing of their Mendix applications, ensuring that they work correctly without manual testing. The other options either pertain to different aspects of application development or quality assessment but do not offer automated testing capabilities."
+    },
+    {
+        question: "What is the purpose of the Mendix App Feedback module?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "To collect user feedback on app performance", correct: false, explanation: "(Incorrect) While collecting user feedback on app performance is important, the Mendix App Feedback module is specifically designed for bug reporting and tracking rather than general performance feedback." },
+            { letter: "B", text: "To gather suggestions for new app features", correct: false, explanation: "(Incorrect) Gathering suggestions for new app features can be part of user feedback, but the Mendix App Feedback module is primarily focused on bug reporting and tracking." },
+            { letter: "C", text: "To provide a platform for user reviews and ratings", correct: false, explanation: "(Incorrect) The Mendix App Feedback module is not designed to serve as a platform for user reviews and ratings. Its main purpose is to facilitate bug reporting and tracking." },
+            { letter: "D", text: "To facilitate bug reporting and tracking", correct: true, explanation: "(Correct) The primary purpose of the Mendix App Feedback module is to allow users to report bugs and for developers to track and manage these issues effectively." }
+        ],
+        generalExplanation: "The Mendix App Feedback module is a tool designed to facilitate the reporting and tracking of bugs within an application. This module helps developers quickly identify and resolve issues reported by users, ensuring a smoother and more efficient development process."
+    },
+    {
+        question: "In Mendix, what is the consequence of setting an association's ownership to 'Both'?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "Both entities can exist independently of each other.", correct: false, explanation: "(Incorrect) This option is incorrect because setting an association's ownership to 'Both' implies that both entities have control over the association, not that they can exist independently." },
+            { letter: "B", text: "Both entities are considered parents and control the delete behavior.", correct: true, explanation: "(Correct) This option is correct because when ownership is set to 'Both', both entities act as parents. This means both can control the association and the delete behavior." },
+            { letter: "C", text: "Both entities are considered children and are dependent on each other.", correct: false, explanation: "(Incorrect) This option is incorrect because setting ownership to 'Both' does not make the entities dependent on each other; it makes them both responsible for the association." },
+            { letter: "D", text: "The association does not have a clear owner, leading to potential data inconsistencies.", correct: false, explanation: "(Incorrect) This option is incorrect because setting ownership to 'Both' actually clarifies that both entities own the association, which does not necessarily lead to data inconsistencies." }
+        ],
+        generalExplanation: "In Mendix, setting an association's ownership to 'Both' means that both entities involved in the association are considered parents. This means they both have control over the association, including delete behavior. This does not imply independence or dependency, nor does it lead to data inconsistencies if managed correctly."
+    },
+    {
+        question: "What does the presence of black sequence flow arrows indicate in a Mendix microflow?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "They represent the execution of error-handling paths", correct: false, explanation: "(Incorrect) Black sequence flow arrows do not represent error-handling paths. Error-handling paths are usually indicated by specific constructs or different colored arrows in Mendix." },
+            { letter: "B", text: "They indicate the default flow after a decision", correct: false, explanation: "(Incorrect) Default flows after a decision are typically represented by a different style or color of arrow, not black sequence flow arrows." },
+            { letter: "C", text: "They show the primary path of logic execution", correct: true, explanation: "(Correct) Black sequence flow arrows in Mendix microflows indicate the primary path of logic execution, showing the main sequence of actions." },
+            { letter: "D", text: "They denote alternative paths that can be taken conditionally", correct: false, explanation: "(Incorrect) Alternative conditional paths are usually represented by different types or colors of arrows, not the primary black sequence flow arrows." }
+        ],
+        generalExplanation: "In Mendix microflows, black sequence flow arrows are used to show the primary path of logic execution. They indicate the main sequence of actions that the microflow will follow, as opposed to error-handling or conditional alternative paths which are represented differently."
+    },
+    {
+        question: "What is the purpose of using a Reference Set Selector in the context of Mendix associations?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "To select a single object referenced by an association", correct: false, explanation: "Incorrect: A Reference Set Selector is used to handle multiple objects, not a single object. For selecting a single object, a Reference Selector would be more appropriate." },
+            { letter: "B", text: "To display and edit a list of objects associated by a One-to-Many Association", correct: false, explanation: "Incorrect: While a Reference Set Selector can display multiple objects, it is more suited for Many-to-Many associations rather than One-to-Many associations." },
+            { letter: "C", text: "To display and edit a set of objects associated by a Many-to-Many Association", correct: true, explanation: "Correct: A Reference Set Selector is designed to display and edit multiple objects in a Many-to-Many association, making this the correct option." },
+            { letter: "D", text: "To create a new object and associate it with the current object", correct: false, explanation: "Incorrect: The Reference Set Selector is not used for creating new objects. It is used for selecting and managing existing objects in a Many-to-Many association." }
+        ],
+        generalExplanation: "A Reference Set Selector in Mendix is specifically designed to handle Many-to-Many associations. It allows users to display and edit a set of related objects, making it ideal for scenarios where multiple objects are associated with each other in a complex relationship."
+    },
+    {
+        question: "What is considered a best practice when committing changes to the Mendix Team Server repository?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "Committing all changes without reviewing them", correct: false, explanation: "(Incorrect) Committing changes without reviewing them can introduce errors and inconsistencies into the codebase, making it difficult to maintain and debug." },
+            { letter: "B", text: "Committing large sets of unrelated changes", correct: false, explanation: "(Incorrect) Committing large sets of unrelated changes makes it hard to track specific changes and can complicate the process of identifying the source of issues." },
+            { letter: "C", text: "Including detailed messages with each commit", correct: true, explanation: "(Correct) Detailed commit messages provide context for the changes, making it easier for team members to understand the purpose and scope of each commit, and facilitating better collaboration." },
+            { letter: "D", text: "Committing changes only at the end of the project", correct: false, explanation: "(Incorrect) Committing changes only at the end of the project can result in a loss of incremental progress and makes it difficult to track and manage the development process." }
+        ],
+        generalExplanation: "The best practice when committing changes to the Mendix Team Server repository is to include detailed messages with each commit. This practice helps maintain clear communication within the team, ensures better traceability of changes, and facilitates easier debugging and maintenance."
+    },
+    {
+        question: "In Mendix, how is the 'Range' validation rule applied to numeric attributes?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "To set a fixed value for the attribute", correct: false, explanation: "(Incorrect) This option is incorrect because the 'Range' validation rule does not set a fixed value for the attribute; it restricts the values within a defined range." },
+            { letter: "B", text: "To restrict the attribute value to a specific set of numbers", correct: false, explanation: "(Incorrect) This option is incorrect as the 'Range' validation rule does not limit the attribute to a specific set of numbers but rather defines a minimum and maximum value." },
+            { letter: "C", text: "To define a minimum and maximum value that the attribute can take", correct: true, explanation: "(Correct) This option is correct because the 'Range' validation rule in Mendix is used to specify the minimum and maximum values an attribute can have." },
+            { letter: "D", text: "To categorize the attribute values into different ranges", correct: false, explanation: "(Incorrect) This option is incorrect because the 'Range' validation rule does not categorize values into ranges; it simply restricts the values within a single specified range." }
+        ],
+        generalExplanation: "The 'Range' validation rule in Mendix is used to ensure that numeric attributes fall within a specified minimum and maximum value. This helps maintain data integrity by preventing values outside the defined range from being entered."
+    },
+    {
+        question: "Which security measure should be applied to prevent unauthorized access to a sensitive page in a Mendix application?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Enable two-factor authentication for the sensitive page.", correct: false, explanation: "(Incorrect) Two-factor authentication enhances overall security but does not directly control access to a specific page based on user roles." },
+            { letter: "B", text: "Restrict page access to authorized user roles only.", correct: true, explanation: "(Correct) Restricting page access to authorized user roles ensures that only users with the necessary permissions can access the sensitive page." },
+            { letter: "C", text: "Encrypt the page data using a third-party service.", correct: false, explanation: "(Incorrect) Encrypting data protects it during transmission and storage but does not prevent unauthorized access to the page itself." },
+            { letter: "D", text: "Set all page widgets to read-only mode.", correct: false, explanation: "(Incorrect) Setting widgets to read-only mode restricts data modification but does not prevent unauthorized users from accessing the page." }
+        ],
+        generalExplanation: "To prevent unauthorized access to a sensitive page in a Mendix application, the most effective measure is to restrict access based on user roles. This ensures that only users with the appropriate permissions can view or interact with the sensitive page, providing a clear and enforceable access control mechanism."
+    },
+    {
+        question: "If a page containing a sensitive attribute is accessible by a user role that should not view that attribute, what is the appropriate measure to resolve this?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Remove the user role's access to the page entirely.", correct: false, explanation: "(Incorrect) This option is too restrictive and may prevent users from accessing other non-sensitive information on the page that they need." },
+            { letter: "B", text: "Restrict access to the attribute using entity access rules.", correct: false, explanation: "(Incorrect) While entity access rules can control access to data, they may not be sufficient to handle UI-level visibility requirements." },
+            { letter: "C", text: "Hide the sensitive attribute using conditional visibility settings.", correct: true, explanation: "(Correct) This option allows the sensitive information to be hidden from unauthorized users while still allowing access to other parts of the page." },
+            { letter: "D", text: "Redesign the page without the sensitive attribute.", correct: false, explanation: "(Incorrect) Redesigning the page can be a complex and time-consuming process and may not be necessary if conditional visibility settings can solve the issue." }
+        ],
+        generalExplanation: "The best approach is to use conditional visibility settings to hide the sensitive attribute from unauthorized users. This ensures that users can still access other important information on the page without seeing the sensitive data."
+    },
+    {
+        question: "What feature should you use to share ideas for enhancing the Mendix platform?",
+        domain: "The Mendix Ecosystem",
+        options: [
+            { letter: "A", text: "Mendix Idea Forum", correct: true, explanation: "(Correct) The Mendix Idea Forum is specifically designed for users to share and discuss ideas for enhancing the Mendix platform. It allows the community to vote on suggestions, helping prioritize improvements." },
+            { letter: "B", text: "Mendix Support Ticket", correct: false, explanation: "(Incorrect) Mendix Support Tickets are intended for reporting issues and getting technical assistance, not for sharing enhancement ideas." },
+            { letter: "C", text: "Mendix Direct Feedback", correct: false, explanation: "(Incorrect) Mendix Direct Feedback is used for providing feedback on specific applications or projects, not for general platform enhancements." },
+            { letter: "D", text: "Mendix Enhancement Request", correct: false, explanation: "(Incorrect) While Mendix Enhancement Requests may sound relevant, they are not the primary channel for community-driven idea sharing. The Idea Forum is the preferred platform." }
+        ],
+        generalExplanation: "The Mendix Idea Forum is the designated platform for users to share, discuss, and vote on ideas for enhancing the Mendix platform. This collaborative approach helps prioritize the most valuable improvements based on community feedback."
+    },
+    {
+        question: "In Mendix, how can you ensure that a page is optimized for use on a tablet device?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "By selecting the 'Tablet' option in the page properties", correct: false, explanation: "(Incorrect) Mendix does not provide a specific 'Tablet' option in the page properties to optimize a page for tablet devices." },
+            { letter: "B", text: "By creating a separate tablet-specific navigation profile", correct: false, explanation: "(Incorrect) While creating a tablet-specific navigation profile can help in directing users to tablet-optimized pages, it does not inherently optimize a page for tablet use." },
+            { letter: "C", text: "By using the 'Responsive' layout grid specifically designed for tablets", correct: true, explanation: "(Correct) The 'Responsive' layout grid in Mendix is designed to adjust the layout based on the device, including tablets, ensuring optimal display and usability." },
+            { letter: "D", text: "By restricting access to the page from any non-tablet devices", correct: false, explanation: "(Incorrect) Restricting access based on device type does not optimize the page for tablet use; it merely limits who can view the page." }
+        ],
+        generalExplanation: "To ensure that a page is optimized for use on a tablet device in Mendix, the best approach is to use the 'Responsive' layout grid. This layout adapts to different screen sizes and resolutions, providing an optimal user experience across various devices, including tablets."
+    },
+    {
+        question: "Within the context of Mendix, what is the definition of a 'Parameter'?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "A variable that stores temporary data", correct: false, explanation: "(Incorrect) This option describes a variable, which can store temporary data during the execution of a microflow or nanoflow, but it is not specifically a parameter." },
+            { letter: "B", text: "A fixed value that cannot be changed", correct: false, explanation: "(Incorrect) This describes a constant, not a parameter. A parameter is an input value that can vary, whereas a constant remains unchanged." },
+            { letter: "C", text: "An input value passed to a microflow, nanoflow, or page", correct: true, explanation: "(Correct) This is the correct definition of a parameter in Mendix. Parameters are used to pass input values into microflows, nanoflows, or pages to influence their behavior." },
+            { letter: "D", text: "A configuration setting for an app project", correct: false, explanation: "(Incorrect) This option refers to configuration settings, which are used to configure the behavior of an app project, not to parameters which are input values." }
+        ],
+        generalExplanation: "In the context of Mendix, a parameter is an input value that is passed to a microflow, nanoflow, or page. These parameters allow the flow or page to use the provided input data to perform specific actions or display relevant information."
+    },
+    {
+        question: "In Mendix microflows, what is the role of the Assist Logic Bot?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "It provides code snippets for faster development", correct: false, explanation: "(Incorrect) While providing code snippets can speed up development, this is not the primary role of the Assist Logic Bot in Mendix microflows." },
+            { letter: "B", text: "It suggests improvements to logic and highlights errors", correct: true, explanation: "(Correct) The Assist Logic Bot in Mendix microflows helps developers by suggesting improvements and highlighting errors in the logic, thereby ensuring better and more efficient workflow designs." },
+            { letter: "C", text: "It automatically generates microflows based on user requirements", correct: false, explanation: "(Incorrect) The Assist Logic Bot does not automatically generate microflows based on user requirements. Its function is more focused on assisting and optimizing existing logic." },
+            { letter: "D", text: "It deploys the app to the cloud environment", correct: false, explanation: "(Incorrect) Deploying the app to the cloud environment is not the role of the Assist Logic Bot. This task is typically handled by deployment tools or processes within Mendix." }
+        ],
+        generalExplanation: "The Assist Logic Bot in Mendix microflows is a tool designed to help developers by suggesting improvements to logic and highlighting potential errors. This ensures that the microflows are optimized and function correctly, enhancing the overall development process."
+    },
+    {
+        question: "In Agile, what is the purpose of a Burndown Chart?",
+        domain: "Collaboration and Agile",
+        options: [
+            { letter: "A", text: "To track the number of bugs reported over time", correct: false, explanation: "(Incorrect) A Burndown Chart is not used to track bugs. It is primarily used to visualize the remaining work in a sprint or project." },
+            { letter: "B", text: "To show the amount of work completed versus the total work", correct: true, explanation: "(Correct) This is the main purpose of a Burndown Chart. It shows the amount of work completed over time compared to the total work planned." },
+            { letter: "C", text: "To display the team's availability throughout the Sprint", correct: false, explanation: "(Incorrect) A Burndown Chart does not display team availability. It focuses on tracking the progress of work completion." },
+            { letter: "D", text: "To compare the estimated effort against the actual effort", correct: false, explanation: "(Incorrect) While this can be inferred, the primary purpose of a Burndown Chart is to show work remaining versus time, not directly comparing estimated versus actual effort." }
+        ],
+        generalExplanation: "A Burndown Chart is a graphical representation used in Agile project management to track the amount of work remaining in a sprint or project over time. It helps teams monitor progress and ensure they are on track to complete their tasks within the sprint duration."
+    },
+    {
+        question: "How can you display all validation messages for a Mendix form at once?",
+        domain: "Data Validation and Consistency",
+        options: [
+            { letter: "A", text: "By using a 'Show validation messages' button", correct: false, explanation: "(Incorrect) Mendix does not provide a built-in 'Show validation messages' button to display all validation messages at once. This option would require custom implementation." },
+            { letter: "B", text: "Through a custom JavaScript action", correct: false, explanation: "(Incorrect) While it is possible to create a custom JavaScript action to display validation messages, this is not a standard or recommended approach in Mendix." },
+            { letter: "C", text: "By enabling 'Aggregate validation messages' in project settings", correct: true, explanation: "(Correct) Enabling 'Aggregate validation messages' in project settings will gather all validation messages and display them at once, making it easier for users to see all issues at a glance." },
+            { letter: "D", text: "By placing a 'Validation message' widget at the top of the form", correct: false, explanation: "(Incorrect) Placing a 'Validation message' widget at the top of the form can display individual validation messages, but it won't aggregate all messages automatically." }
+        ],
+        generalExplanation: "To display all validation messages for a Mendix form at once, the correct approach is to enable 'Aggregate validation messages' in the project settings. This feature consolidates all validation messages and presents them together, enhancing user experience by providing a comprehensive view of all validation issues."
+    },
+    {
+        question: "What is the consequence of setting a 'Breakpoint' in a microflow?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "It causes the microflow to loop indefinitely", correct: false, explanation: "(Incorrect) Setting a breakpoint does not cause the microflow to loop indefinitely. Instead, it pauses the execution at the breakpoint for debugging purposes." },
+            { letter: "B", text: "It signals the microflow to skip the next activity", correct: false, explanation: "(Incorrect) A breakpoint does not signal the microflow to skip the next activity. It is used to pause the execution for the developer to inspect the current state." },
+            { letter: "C", text: "It allows the developer to pause the microflow execution for debugging", correct: true, explanation: "(Correct) This is the correct answer. A breakpoint is used to temporarily halt the execution of a microflow, enabling the developer to debug and inspect the current state of the application." },
+            { letter: "D", text: "It prevents the microflow from being executed in the live environment", correct: false, explanation: "(Incorrect) A breakpoint does not prevent a microflow from being executed in the live environment. It is a tool used primarily during the development and debugging phases." }
+        ],
+        generalExplanation: "Setting a breakpoint in a microflow is a debugging tool that allows the developer to pause the execution of the microflow. This enables the developer to inspect variables, evaluate conditions, and understand the flow of the microflow at specific points. It is essential for identifying and resolving issues within the microflow logic."
+    },
+    {
+        question: "What is the purpose of a 'Sub microflow' call in a Mendix microflow?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "To execute another microflow within the context of the current microflow", correct: true, explanation: "(Correct) A 'Sub microflow' call is used to execute another microflow within the context of the current microflow. It allows for modularization and reuse of microflow logic." },
+            { letter: "B", text: "To define a transaction boundary within the microflow", correct: false, explanation: "(Incorrect) A 'Sub microflow' call does not define a transaction boundary. Instead, transaction boundaries are typically managed through other means, such as commit actions or explicit transaction management." },
+            { letter: "C", text: "To trigger a microflow asynchronously", correct: false, explanation: "(Incorrect) A 'Sub microflow' call executes the microflow synchronously within the current context, not asynchronously. Asynchronous execution is handled differently in Mendix." },
+            { letter: "D", text: "To duplicate the logic of the current microflow", correct: false, explanation: "(Incorrect) The purpose of a 'Sub microflow' call is not to duplicate logic but to reuse and modularize it. Duplication would lead to maintenance challenges and is not a best practice." }
+        ],
+        generalExplanation: "The primary purpose of a 'Sub microflow' call in Mendix is to execute another microflow within the context of the current microflow. This facilitates modularization and reuse of logic, making the overall design more maintainable and efficient."
+    },
+    {
+        question: "What should be done to ensure that a user role can only execute a microflow after passing certain security checks?",
+        domain: "Security",
+        options: [
+            { letter: "A", text: "Embed the microflow in a nanoflow with security checks.", correct: false, explanation: "(Incorrect) While embedding a microflow in a nanoflow with security checks can add an extra layer of security, it is not the most efficient or straightforward way to handle execution rights for user roles." },
+            { letter: "B", text: "Use a decision activity within the microflow to enforce security checks.", correct: false, explanation: "(Incorrect) Although using a decision activity within the microflow can enforce security checks, it does not handle execution rights at the user role level, which is a more comprehensive approach." },
+            { letter: "C", text: "Configure the microflow's execution rights in the security settings for the user role.", correct: true, explanation: "(Correct) This is the most appropriate method as it directly configures the microflow's execution rights in the security settings, ensuring that only authorized user roles can execute the microflow." },
+            { letter: "D", text: "Implement a custom Java action with security checks.", correct: false, explanation: "(Incorrect) Implementing a custom Java action with security checks is more complex and unnecessary when the security settings for user roles can be configured directly within the Mendix platform." }
+        ],
+        generalExplanation: "To ensure that a user role can only execute a microflow after passing certain security checks, the most effective method is to configure the microflow's execution rights in the security settings for the user role. This approach is straightforward and leverages Mendix's built-in security features to manage access control effectively."
+    },
+    {
+        question: "When scheduling a new TrainingEvent using a microflow, which activity is essential?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "Create object activity", correct: true, explanation: "(Correct) Creating a new TrainingEvent requires initializing a new object instance. The 'Create object' activity is essential for this purpose in a microflow." },
+            { letter: "B", text: "Delete object activity", correct: false, explanation: "(Incorrect) Deleting an object is not relevant when scheduling a new TrainingEvent, as it would remove an existing object rather than creating a new one." },
+            { letter: "C", text: "Change object activity", correct: false, explanation: "(Incorrect) Changing an object is used to update an existing object's attributes. It does not create a new object, which is necessary for scheduling a new TrainingEvent." },
+            { letter: "D", text: "Aggregate list activity", correct: false, explanation: "(Incorrect) Aggregating a list is used to perform operations like sum, count, or average on a list of objects. It is not involved in creating a new object." }
+        ],
+        generalExplanation: "When scheduling a new TrainingEvent using a microflow, the essential activity is to create a new object to represent the TrainingEvent. The 'Create object' activity initializes this new object, making it possible to define its attributes and subsequently use it in the application."
+    },
+    {
+        question: "In the context of Mendix Domain Models, which association type allows for the creation of complex nested data structures?",
+        domain: "Associations",
+        options: [
+            { letter: "A", text: "One-to-One Association", correct: false, explanation: "(Incorrect) One-to-One Association links two entities in a single relationship, which does not inherently support complex nested structures." },
+            { letter: "B", text: "One-to-Many Association", correct: true, explanation: "(Correct) One-to-Many Association allows one entity to be associated with multiple instances of another entity, facilitating the creation of nested data structures." },
+            { letter: "C", text: "Many-to-Many Association", correct: false, explanation: "(Incorrect) Many-to-Many Association connects multiple instances of one entity to multiple instances of another, but it doesn't inherently create nested structures." },
+            { letter: "D", text: "Self-Association", correct: false, explanation: "(Incorrect) Self-Association links an entity to itself, which can create hierarchical structures but not necessarily complex nested data structures." }
+        ],
+        generalExplanation: "For creating complex nested data structures in Mendix Domain Models, a One-to-Many Association is most suitable. This type of association allows one instance of an entity to be related to multiple instances of another entity, enabling the nesting of data within the model."
+    },
+    {
+        question: "Which data type can be an attribute in a Mendix entity?",
+        domain: "Microflows 1",
+        options: [
+            { letter: "A", text: "Array", correct: false, explanation: "(Incorrect) Mendix does not support 'Array' as a data type for attributes in an entity. Attributes in Mendix are typically primitive data types like Boolean, Integer, String, etc." },
+            { letter: "B", text: "Boolean", correct: true, explanation: "(Correct) 'Boolean' is a supported attribute type in Mendix. It represents a true or false value and is commonly used for conditional logic in applications." },
+            { letter: "C", text: "Function", correct: false, explanation: "(Incorrect) 'Function' is not a supported attribute type in Mendix. Attributes are meant to store data, whereas functions are used to perform operations or calculations." },
+            { letter: "D", text: "Class", correct: false, explanation: "(Incorrect) 'Class' is not a supported attribute type in Mendix. Mendix uses entities to model data, and attributes within these entities are primitive data types." }
+        ],
+        generalExplanation: "In Mendix, attributes in an entity are used to store data and can be of primitive data types such as Boolean, Integer, String, etc. Complex types like Array, Function, and Class are not supported as attribute types."
+    },
+    {
+        question: "In Mendix, what is the definition of a transient object?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "An object that is temporarily stored in the database", correct: false, explanation: "(Incorrect) This option is incorrect because a transient object is not stored in the database at all, even temporarily. It exists only in memory." },
+            { letter: "B", text: "An object that has been deleted but can be restored", correct: false, explanation: "(Incorrect) This option is incorrect because a deleted object that can be restored is not considered transient. Transient objects have never been persisted to the database." },
+            { letter: "C", text: "An object that exists only in memory and is not persisted to the database", correct: true, explanation: "(Correct) This option is correct. A transient object exists only in memory during the runtime of a microflow and is not stored in the database." },
+            { letter: "D", text: "An object that is being transferred between different microflows", correct: false, explanation: "(Incorrect) This option is incorrect. While objects can be passed between microflows, this does not define a transient object. Transient objects are specifically those not persisted to the database." }
+        ],
+        generalExplanation: "In Mendix, a transient object is one that exists only in memory during the runtime of a microflow and is not persisted to the database. This is useful for temporary data manipulation and processing within the application logic without affecting the database."
+    },
+    {
+        question: "What is the fundamental role of the Mendix Team Server in the development process?",
+        domain: "Pages and Team Server",
+        options: [
+            { letter: "A", text: "To provide cloud-based storage for application data", correct: false, explanation: "(Incorrect) The Mendix Team Server is not primarily designed for storing application data; it is focused on code versioning and collaboration." },
+            { letter: "B", text: "To facilitate continuous integration and deployment", correct: false, explanation: "(Incorrect) While continuous integration and deployment are crucial in modern development, the Mendix Team Server's primary role is not to facilitate these processes directly." },
+            { letter: "C", text: "To act as the central repository for code versioning and collaboration", correct: true, explanation: "(Correct) The fundamental role of the Mendix Team Server is to serve as a central repository for code versioning and collaboration, allowing team members to work together efficiently." },
+            { letter: "D", text: "To manage the licensing and subscription details of the project", correct: false, explanation: "(Incorrect) The Mendix Team Server does not manage licensing or subscription details; these are handled separately through Mendix's licensing system." }
+        ],
+        generalExplanation: "The Mendix Team Server is a crucial component in the Mendix development process, primarily serving as a central repository for code versioning and collaboration. This allows multiple developers to work on the same project simultaneously, ensuring that changes are tracked and managed efficiently."
+    },
+    {
+        question: "In the context of a microflow, what is a 'token'?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "A placeholder for user input", correct: false, explanation: "Incorrect: A token in the context of a microflow is not a placeholder for user input. Placeholders are used in forms or interfaces to indicate where a user should enter data." },
+            { letter: "B", text: "A unique identifier for a microflow", correct: false, explanation: "Incorrect: A token does not serve as a unique identifier for a microflow. Unique identifiers are typically used to distinguish different instances or elements within a system." },
+            { letter: "C", text: "A small piece of data used for authentication purposes", correct: false, explanation: "Incorrect: Tokens used for authentication purposes are generally security tokens, which are distinct from the concept of tokens in microflows." },
+            { letter: "D", text: "A value or symbol that represents an entity attribute or variable", correct: true, explanation: "Correct: In the context of a microflow, a token is a value or symbol that represents an entity attribute or variable, facilitating the flow of data within the process." }
+        ],
+        generalExplanation: "In microflows, a token represents an entity attribute or variable, helping to manage and manipulate data as it moves through the flow. It is essential for understanding how data is processed and utilized within the microflow environment."
+    },
+    {
+        question: "What is the function of the 'Cast Object' activity in a microflow?",
+        domain: "Microflows 2",
+        options: [
+            { letter: "A", text: "To change the type of an object to a different entity", correct: true, explanation: "(Correct) The 'Cast Object' activity in a microflow is used to change the type of an object to a different entity, provided the entities share a common ancestor." },
+            { letter: "B", text: "To convert an object to a primitive data type", correct: false, explanation: "(Incorrect) The 'Cast Object' activity does not convert an object to a primitive data type. This functionality is outside the scope of what 'Cast Object' is designed to do." },
+            { letter: "C", text: "To duplicate an object with a new identity", correct: false, explanation: "(Incorrect) The 'Cast Object' activity does not duplicate an object. It only changes the type of the object, not its identity or instance." },
+            { letter: "D", text: "To validate the type of an object against its entity", correct: false, explanation: "(Incorrect) The 'Cast Object' activity does not perform validation of the type of an object. Validation is a different process and not related to casting." }
+        ],
+        generalExplanation: "The 'Cast Object' activity in Mendix microflows is used to change the type of an object to a different entity, provided they share a common ancestor. This is useful for handling polymorphic data structures where the specific type of an object needs to be accessed or manipulated."
+    },
+    {
+        question: "In a Mendix Domain Model, what is the purpose of a calculated attribute?",
+        domain: "Domain Model",
+        options: [
+            { letter: "A", text: "To provide a static, unchangeable value for an entity attribute", correct: false, explanation: "(Incorrect) This option is incorrect because a calculated attribute is dynamic and changes based on other attribute values, rather than being static and unchangeable." },
+            { letter: "B", text: "To define an attribute whose value is computed based on other attribute values", correct: true, explanation: "(Correct) This option is correct. A calculated attribute is designed to compute its value based on other attribute values within the entity, providing dynamic and context-sensitive data." },
+            { letter: "C", text: "To create an attribute that can only be modified by administrators", correct: false, explanation: "(Incorrect) This option is incorrect as it describes a security or permission feature, not the purpose of a calculated attribute. Calculated attributes are about dynamic computation, not access control." },
+            { letter: "D", text: "To store values that are input by users during runtime", correct: false, explanation: "(Incorrect) This option is incorrect because calculated attributes are not meant for direct user input but are automatically computed based on other attributes' values." }
+        ],
+        generalExplanation: "In a Mendix Domain Model, a calculated attribute is used to define an attribute whose value is dynamically computed based on the values of other attributes within the entity. This allows for real-time updates and ensures that the attribute's value is always accurate and relevant to the current state of the entity."
+    },
+    {
+        question: "What does the term 'working copy' refer to in the Mendix environment?",
+        domain: "General",
+        options: [
+            { letter: "A", text: "The live version of the app currently in use", correct: false, explanation: "(Incorrect) The live version refers to the deployed and running instance of the app, not a 'working copy'." },
+            { letter: "B", text: "A saved version of the app for backup purposes", correct: false, explanation: "(Incorrect) A saved version for backup is typically referred to as a backup or snapshot, not a 'working copy'." },
+            { letter: "C", text: "A local copy of the app project for development purposes", correct: true, explanation: "(Correct) A 'working copy' in Mendix is a local copy of the app project used for development and testing before committing changes." },
+            { letter: "D", text: "The last committed version of the app in the Team Server", correct: false, explanation: "(Incorrect) The last committed version in the Team Server is known as the committed version, not a 'working copy'." }
+        ],
+        generalExplanation: "In the Mendix environment, a 'working copy' refers to a local copy of the app project that developers use for making changes and testing locally before committing those changes to the Team Server. This ensures that development can proceed without affecting the live version or the committed versions in the server."
+    }
+];
+
+        // Variables de estado
+        let currentQuestion = 0;
+        let selectedOption = null;
+        let answers = Array(examData.length).fill(null);
+        let score = 0;
+        let timer;
+        let timeLeft = 60 * 60; // 60 minutos en segundos
+
+        // Elementos del DOM
+        const questionContainer = document.getElementById('question-container');
+        const resultsContainer = document.getElementById('results-container');
+        const progressBar = document.getElementById('progress');
+        const progressText = document.getElementById('progress-text');
+        const timeDisplay = document.getElementById('time');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Inicializar el examen
+        function initExam() {
+            updateQuestion();
+            startTimer();
+            
+            // Event listeners para las opciones
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    if (!answers[currentQuestion]) { // Solo permitir selección si no se ha respondido
+                        selectOption(this);
+                    }
+                });
+            });
+            
+            // Event listeners para los botones de navegación
+            document.querySelector('.btn-prev').addEventListener('click', prevQuestion);
+            document.querySelector('.btn-next').addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restartExam);
+        }
+
+        // Actualizar la pregunta actual
+        function updateQuestion() {
+            const question = examData[currentQuestion];
+            
+            // Actualizar el número de pregunta y dominio
+            document.querySelector('.question-number').textContent = `Pregunta ${currentQuestion + 1}`;
+            document.querySelector('.domain-tag').textContent = question.domain;
+            
+            // Actualizar el texto de la pregunta
+            document.querySelector('.question-text').textContent = question.question;
+            
+            // Actualizar las opciones
+            const options = document.querySelectorAll('.option');
+            question.options.forEach((option, index) => {
+                options[index].querySelector('.option-text').textContent = option.text;
+                options[index].className = 'option';
+                options[index].classList.add('fade-in');
+                
+                // Marcar si ya fue respondida
+                if (answers[currentQuestion] === option.letter) {
+                    options[index].classList.add('selected');
+                    if (option.correct) {
+                        options[index].classList.add('correct');
+                    } else {
+                        options[index].classList.add('incorrect');
+                    }
+                }
+            });
+            
+            // Actualizar feedback si ya fue respondida
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback-container';
+            
+            if (answers[currentQuestion] !== null) {
+                const selected = question.options.find(opt => opt.letter === answers[currentQuestion]);
+                if (selected.correct) {
+                    feedback.classList.add('correct-feedback', 'show');
+                    feedback.querySelector('.feedback-header i').className = 'fas fa-check-circle';
+                    feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es correcta';
+                } else {
+                    feedback.classList.add('incorrect-feedback', 'show');
+                    feedback.querySelector('.feedback-header i').className = 'fas fa-times-circle';
+                    feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es incorrecta';
+                }
+                
+                feedback.querySelector('.explanation').textContent = selected.explanation;
+                feedback.querySelector('.general-explanation').textContent = question.generalExplanation;
+            }
+            
+            // Actualizar progreso
+            progressBar.value = currentQuestion + 1;
+            progressText.textContent = `${currentQuestion + 1}/${examData.length}`;
+            
+            // Actualizar botones de navegación
+            document.querySelector('.btn-prev').disabled = currentQuestion === 0;
+            
+            if (currentQuestion === examData.length - 1) {
+                document.querySelector('.btn-next').className = 'btn-submit';
+                document.querySelector('.btn-next').innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Examen';
+            } else {
+                document.querySelector('.btn-next').className = 'btn-next';
+                document.querySelector('.btn-next').innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+            }
+        }
+
+        // Seleccionar una opción
+        function selectOption(optionElement) {
+            // Deseleccionar cualquier opción previa
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Seleccionar la nueva opción
+            optionElement.classList.add('selected');
+            selectedOption = optionElement.getAttribute('data-option');
+            
+            // Guardar la respuesta
+            answers[currentQuestion] = selectedOption;
+            
+            // Mostrar feedback
+            const question = examData[currentQuestion];
+            const selected = question.options.find(opt => opt.letter === selectedOption);
+            const feedback = document.getElementById('feedback');
+            
+            feedback.className = 'feedback-container show';
+            if (selected.correct) {
+                feedback.classList.add('correct-feedback');
+                feedback.querySelector('.feedback-header i').className = 'fas fa-check-circle';
+                feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es correcta';
+                score++;
+            } else {
+                feedback.classList.add('incorrect-feedback');
+                feedback.querySelector('.feedback-header i').className = 'fas fa-times-circle';
+                feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es incorrecta';
+                
+                // Resaltar la respuesta correcta
+                const correctOption = document.querySelector(`.option[data-option="${question.options.find(opt => opt.correct).letter}"]`);
+                correctOption.classList.add('correct');
+            }
+            
+            feedback.querySelector('.explanation').textContent = selected.explanation;
+            feedback.querySelector('.general-explanation').textContent = question.generalExplanation;
+        }
+
+        // Navegar a la pregunta anterior
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                updateQuestion();
+            }
+        }
+
+        // Navegar a la siguiente pregunta
+        function nextQuestion() {
+            if (currentQuestion < examData.length - 1) {
+                currentQuestion++;
+                updateQuestion();
+            } else {
+                finishExam();
+            }
+        }
+
+        // Finalizar el examen
+        function finishExam() {
+            clearInterval(timer);
+            
+            // Calcular puntaje
+            const correctAnswers = answers.reduce((count, answer, index) => {
+                if (answer) {
+                    const question = examData[index];
+                    const selected = question.options.find(opt => opt.letter === answer);
+                    return count + (selected.correct ? 1 : 0);
+                }
+                return count;
+            }, 0);
+            
+            const percentage = Math.round((correctAnswers / examData.length) * 100);
+            
+            // Mostrar resultados
+            questionContainer.style.display = 'none';
+            resultsContainer.classList.add('show', 'fade-in');
+            
+            document.querySelector('.results-score').textContent = `${percentage}%`;
+            document.querySelector('.correct-stat .stat-number').textContent = correctAnswers;
+            document.querySelector('.incorrect-stat .stat-number').textContent = examData.length - correctAnswers;
+            
+            // Cambiar icono según el puntaje
+            const resultsIcon = document.querySelector('.results-icon');
+            if (percentage >= 80) {
+                resultsIcon.className = 'results-icon success-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-trophy"></i>';
+                document.querySelector('.results-title').textContent = '¡Excelente trabajo!';
+            } else if (percentage >= 60) {
+                resultsIcon.className = 'results-icon warning-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-award"></i>';
+                document.querySelector('.results-title').textContent = '¡Buen trabajo!';
+            } else {
+                resultsIcon.className = 'results-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-book"></i>';
+                document.querySelector('.results-title').textContent = '¡Sigue practicando!';
+            }
+        }
+
+        // Reiniciar el examen
+        function restartExam() {
+            currentQuestion = 0;
+            selectedOption = null;
+            answers = Array(examData.length).fill(null);
+            score = 0;
+            timeLeft = 60 * 60;
+            
+            resultsContainer.classList.remove('show');
+            questionContainer.style.display = 'block';
+            
+            updateQuestion();
+            startTimer();
+        }
+
+        // Temporizador
+        function startTimer() {
+            clearInterval(timer);
+            updateTimerDisplay();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Cambiar color cuando quedan 5 minutos
+            if (timeLeft <= 300) { // 5 minutos = 300 segundos
+                timeDisplay.style.color = 'var(--error-color)';
+            }
+        }
+
+        // Iniciar la aplicación
+        initExam();
+    </script>
+</body>
+</html>

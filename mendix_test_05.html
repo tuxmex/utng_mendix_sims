@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Examen Mendix</title>
+    <style>
+        :root {
+            --primary-color: #458058;
+            --secondary-color: #FF6B00;
+            --accent-color: #3f5a52;
+            --light-color: #F5F7FA;
+            --dark-color: #2D3748;
+            --success-color: #48BB78;
+            --error-color: #F56565;
+            --warning-color: #ED8936;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .exam-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: white;
+            padding: 15px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: var(--light-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .timer i {
+            margin-right: 10px;
+        }
+        
+        .progress-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .progress-text {
+            margin-right: 15px;
+            font-weight: 500;
+        }
+        
+        progress {
+            width: 200px;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        progress::-webkit-progress-bar {
+            background-color: var(--light-color);
+            border-radius: 10px;
+        }
+        
+        progress::-webkit-progress-value {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+        }
+        
+        .question-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        
+        .question-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .domain-tag {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .options-container {
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: var(--light-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background-color: #E2E8F0;
+        }
+        
+        .option.selected {
+            background-color: #EBF8FF;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .option.correct {
+            background-color: #F0FFF4;
+            border: 2px solid var(--success-color);
+        }
+        
+        .option.incorrect {
+            background-color: #FFF5F5;
+            border: 2px solid var(--error-color);
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: white;
+        }
+        
+        .selected .option-letter {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .correct .option-letter {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .incorrect .option-letter {
+            background-color: var(--error-color);
+            color: white;
+        }
+        
+        .option-text {
+            flex-grow: 1;
+        }
+        
+        .feedback-container {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .feedback-container.show {
+            display: block;
+        }
+        
+        .correct-feedback {
+            background-color: #F0FFF4;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .incorrect-feedback {
+            background-color: #FFF5F5;
+            border-left: 5px solid var(--error-color);
+        }
+        
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .feedback-header i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .correct-feedback .feedback-header {
+            color: var(--success-color);
+        }
+        
+        .incorrect-feedback .feedback-header {
+            color: var(--error-color);
+        }
+        
+        .explanation {
+            margin-bottom: 10px;
+        }
+        
+        .general-explanation {
+            font-style: italic;
+            color: #4A5568;
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .btn-prev {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-prev:hover {
+            background-color: #EBF8FF;
+        }
+        
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-next:hover {
+            background-color: #45af53;
+        }
+        
+        .btn-submit {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-submit:hover {
+            background-color: #E05A00;
+        }
+        
+        .results-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .results-container.show {
+            display: block;
+        }
+        
+        .results-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .success-icon {
+            color: var(--success-color);
+        }
+        
+        .warning-icon {
+            color: var(--warning-color);
+        }
+        
+        .results-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+        
+        .results-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .results-details {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .result-stat {
+            margin: 0 15px;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+        
+        .correct-stat {
+            background-color: #F0FFF4;
+            color: var(--success-color);
+        }
+        
+        .incorrect-stat {
+            background-color: #FFF5F5;
+            color: var(--error-color);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .btn-restart {
+            background-color: var(--accent-color);
+            color: white;
+            margin: 0 auto;
+        }
+        
+        .btn-restart:hover {
+            background-color: #00A3B5;
+        }
+        
+        @media (max-width: 768px) {
+            .exam-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .progress-container {
+                margin-top: 15px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .timer {
+                margin-bottom: 15px;
+            }
+            
+            .results-details {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .result-stat {
+                margin: 10px 0;
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Examen Mendix</h1>
+            <p>Practica para tu certificación con este examen interactivo</p>
+        </header>
+        
+        <div class="exam-info">
+            <div class="timer">
+                <i class="fas fa-clock"></i>
+                <span id="time">60:00</span>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text">Progreso:</span>
+                <progress id="progress" value="1" max="50"></progress>
+                <span id="progress-text">1/50</span>
+            </div>
+        </div>
+        
+        <div id="question-container" class="question-container fade-in">
+            <div class="question-header">
+                <span class="question-number">Pregunta 1</span>
+                <span class="domain-tag">Security</span>
+            </div>
+            
+            <div class="question-text">
+                When setting up security for a Mendix application, what is the purpose of 'User role inheritance'?
+            </div>
+            
+            <div class="options-container">
+                <div class="option" data-option="A">
+                    <span class="option-letter">A</span>
+                    <div class="option-text">To allow user roles to inherit access rights from other roles.</div>
+                </div>
+                <div class="option" data-option="B">
+                    <span class="option-letter">B</span>
+                    <div class="option-text">To automatically assign new users to existing roles.</div>
+                </div>
+                <div class="option" data-option="C">
+                    <span class="option-letter">C</span>
+                    <div class="option-text">To create a backup role in case the primary role is deleted.</div>
+                </div>
+                <div class="option" data-option="D">
+                    <span class="option-letter">D</span>
+                    <div class="option-text">To duplicate permissions for creating new, similar roles.</div>
+                </div>
+            </div>
+            
+            <div id="feedback" class="feedback-container">
+                <div class="feedback-header">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Tu respuesta es correcta</span>
+                </div>
+                <div class="explanation">
+                    (Correct) This option is correct because user role inheritance in Mendix allows a user role to inherit permissions and access rights from another role, simplifying the management of user permissions.
+                </div>
+                <div class="general-explanation">
+                    User role inheritance in Mendix is a feature that allows a user role to inherit permissions and access rights from another role. This simplifies the management of user permissions by reducing redundancy and ensuring consistency across different user roles.
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="btn-prev" disabled>
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn-next">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="results-container" class="results-container">
+            <div class="results-icon success-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="results-title">¡Examen Completado!</h2>
+            <div class="results-score">85%</div>
+            
+            <div class="results-details">
+                <div class="result-stat correct-stat">
+                    <div class="stat-number">42</div>
+                    <div>Correctas</div>
+                </div>
+                <div class="result-stat incorrect-stat">
+                    <div class="stat-number">8</div>
+                    <div>Incorrectas</div>
+                </div>
+            </div>
+            
+            <button class="btn-restart" id="restart-btn">
+                <i class="fas fa-redo"></i> Reiniciar Examen
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Datos del examen
+        const examData = [
+  {
+    "question": "What is the primary purpose of the Mendix App Store?",
+    "domain": "The Mendix Ecosystem",
+    "options": [
+      {
+        "letter": "A",
+        "text": "To sell finished Mendix apps",
+        "correct": false,
+        "explanation": "(Incorrect) The Mendix App Store is not primarily focused on selling finished apps."
+      },
+      {
+        "letter": "B",
+        "text": "To provide a platform for user support",
+        "correct": false,
+        "explanation": "(Incorrect) The App Store itself is not intended as a primary platform for user support."
+      },
+      {
+        "letter": "C",
+        "text": "To distribute widgets, modules, and templates",
+        "correct": true,
+        "explanation": "(Correct) The primary purpose is to distribute reusable components."
+      },
+      {
+        "letter": "D",
+        "text": "To offer cloud hosting services for Mendix apps",
+        "correct": false,
+        "explanation": "(Incorrect) Cloud hosting is provided through Mendix Cloud, not the App Store."
+      }
+    ],
+    "generalExplanation": "The Mendix App Store facilitates distribution of reusable components to accelerate development."
+  },
+  {
+    "question": "How can you model a relationship where an Employee links to one Department and a Department has many Employees?",
+    "domain": "Associations",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Many-to-Many Association",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't fit single Department per Employee requirement."
+      },
+      {
+        "letter": "B",
+        "text": "One-to-Many Association",
+        "correct": true,
+        "explanation": "(Correct) Perfectly fits the requirement."
+      },
+      {
+        "letter": "C",
+        "text": "One-to-One Association",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't accommodate Department having multiple Employees."
+      },
+      {
+        "letter": "D",
+        "text": "Self-Association",
+        "correct": false,
+        "explanation": "(Incorrect) Not relevant for linking Employees to Departments."
+      }
+    ],
+    "generalExplanation": "One-to-Many Association ensures each Employee links to one Department while a Department can have many Employees."
+  },
+  {
+    "question": "What happens when using a 'commit' activity without error handling in a microflow?",
+    "domain": "Data Validation and Consistency",
+    "options": [
+      {
+        "letter": "A",
+        "text": "The app will crash if a validation error occurs",
+        "correct": false,
+        "explanation": "Incorrect: Microflows handle errors gracefully without crashing."
+      },
+      {
+        "letter": "B",
+        "text": "The microflow will automatically rollback changes",
+        "correct": true,
+        "explanation": "Correct: Changes are rolled back to maintain data consistency."
+      },
+      {
+        "letter": "C",
+        "text": "The commit will be ignored if validation error is detected",
+        "correct": false,
+        "explanation": "Incorrect: The entire transaction is rolled back."
+      },
+      {
+        "letter": "D",
+        "text": "Validation errors will be suppressed",
+        "correct": false,
+        "explanation": "Incorrect: Errors are thrown as exceptions."
+      }
+    ],
+    "generalExplanation": "A commit without error handling causes rollback on validation errors to prevent partial commits."
+  },
+  {
+    "question": "Which phase follows 'Development' in the Mendix Application Lifecycle?",
+    "domain": "Pages and Team Server",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Testing",
+        "correct": true,
+        "explanation": "(Correct) Testing follows development to verify functionality."
+      },
+      {
+        "letter": "B",
+        "text": "Deployment",
+        "correct": false,
+        "explanation": "(Incorrect) Deployment follows testing."
+      },
+      {
+        "letter": "C",
+        "text": "Design",
+        "correct": false,
+        "explanation": "(Incorrect) Design precedes development."
+      },
+      {
+        "letter": "D",
+        "text": "Feedback",
+        "correct": false,
+        "explanation": "(Incorrect) Feedback comes after deployment."
+      }
+    ],
+    "generalExplanation": "Testing is the critical phase after development to ensure quality before deployment."
+  },
+  {
+    "question": "During which Agile event does the team reflect on the past Sprint?",
+    "domain": "Collaboration and Agile",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Sprint Review",
+        "correct": false,
+        "explanation": "(Incorrect) Review showcases work to stakeholders."
+      },
+      {
+        "letter": "B",
+        "text": "Sprint Planning",
+        "correct": false,
+        "explanation": "(Incorrect) Planning focuses on upcoming work."
+      },
+      {
+        "letter": "C",
+        "text": "Sprint Retrospective",
+        "correct": true,
+        "explanation": "(Correct) Retrospective is for reflection and improvement."
+      },
+      {
+        "letter": "D",
+        "text": "Daily Stand-up",
+        "correct": false,
+        "explanation": "(Incorrect) Stand-up is for daily progress updates."
+      }
+    ],
+    "generalExplanation": "The Sprint Retrospective is dedicated to process improvement through team reflection."
+  },
+  {
+    "question": "What is the primary role of 'annotations' in a microflow?",
+    "domain": "General",
+    "options": [
+      {
+        "letter": "A",
+        "text": "To execute specific actions",
+        "correct": false,
+        "explanation": "Incorrect: Annotations don't execute actions."
+      },
+      {
+        "letter": "B",
+        "text": "To document and explain microflow logic",
+        "correct": true,
+        "explanation": "Correct: Annotations provide documentation."
+      },
+      {
+        "letter": "C",
+        "text": "To store temporary data",
+        "correct": false,
+        "explanation": "Incorrect: Variables store data, not annotations."
+      },
+      {
+        "letter": "D",
+        "text": "To configure access permissions",
+        "correct": false,
+        "explanation": "Incorrect: Security settings handle permissions."
+      }
+    ],
+    "generalExplanation": "Annotations serve as documentation tools to clarify microflow logic for developers."
+  },
+  {
+    "question": "What is a key Agile tenet that Mendix emphasizes?",
+    "domain": "Collaboration and Agile",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Comprehensive documentation",
+        "correct": false,
+        "explanation": "(Incorrect) Agile values working software over documentation."
+      },
+      {
+        "letter": "B",
+        "text": "Adherence to a fixed project plan",
+        "correct": false,
+        "explanation": "(Incorrect) Agile encourages flexibility over rigid plans."
+      },
+      {
+        "letter": "C",
+        "text": "Customer collaboration over contract negotiation",
+        "correct": true,
+        "explanation": "(Correct) This is a core Agile principle."
+      },
+      {
+        "letter": "D",
+        "text": "Following a strict waterfall process",
+        "correct": false,
+        "explanation": "(Incorrect) Agile is iterative, not waterfall."
+      }
+    ],
+    "generalExplanation": "Mendix emphasizes Agile principles like customer collaboration for rapid, adaptive development."
+  },
+  {
+    "question": "Which component structures widget layout on a page?",
+    "domain": "General",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Data View",
+        "correct": false,
+        "explanation": "Incorrect: Data View displays single object attributes."
+      },
+      {
+        "letter": "B",
+        "text": "Snippet",
+        "correct": false,
+        "explanation": "Incorrect: Snippets are reusable components."
+      },
+      {
+        "letter": "C",
+        "text": "Container",
+        "correct": true,
+        "explanation": "Correct: Containers group and style widgets."
+      },
+      {
+        "letter": "D",
+        "text": "Layout Grid",
+        "correct": false,
+        "explanation": "Incorrect: Layout Grid creates responsive layouts."
+      }
+    ],
+    "generalExplanation": "Containers are the primary component for organizing and styling widget layouts."
+  },
+  {
+    "question": "What happens when deleting an object with 'Cascade delete' behavior?",
+    "domain": "Microflows 1",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Object is marked deleted but remains in database",
+        "correct": false,
+        "explanation": "(Incorrect) The object is physically removed."
+      },
+      {
+        "letter": "B",
+        "text": "Object and all associated objects are deleted",
+        "correct": true,
+        "explanation": "(Correct) Cascade delete removes all related objects."
+      },
+      {
+        "letter": "C",
+        "text": "Object is deleted but associated objects remain",
+        "correct": false,
+        "explanation": "(Incorrect) Associated objects are also deleted."
+      },
+      {
+        "letter": "D",
+        "text": "Delete action is logged but object isn't deleted",
+        "correct": false,
+        "explanation": "(Incorrect) The object is actually deleted."
+      }
+    ],
+    "generalExplanation": "Cascade delete ensures referential integrity by removing all dependent objects."
+  },
+  {
+    "question": "Which feature allows creating pages specifically for mobile devices?",
+    "domain": "Pages and Team Server",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Mobile-first design",
+        "correct": false,
+        "explanation": "(Incorrect) A design strategy, not a Mendix feature."
+      },
+      {
+        "letter": "B",
+        "text": "Device type restriction",
+        "correct": false,
+        "explanation": "(Incorrect) Limits functionality by device type."
+      },
+      {
+        "letter": "C",
+        "text": "Navigation profile selection",
+        "correct": true,
+        "explanation": "(Correct) Allows device-specific navigation and pages."
+      },
+      {
+        "letter": "D",
+        "text": "Adaptive layout setting",
+        "correct": false,
+        "explanation": "(Incorrect) Adapts layouts to screen sizes."
+      }
+    ],
+    "generalExplanation": "Navigation profiles enable tailored mobile experiences through device-specific configurations."
+  },
+  {
+    "question": "What does configuring an 'Error Handler' on a microflow activity do?",
+    "domain": "Microflows 2",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Prevents microflow execution",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't prevent execution."
+      },
+      {
+        "letter": "B",
+        "text": "Ensures activity never fails",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't prevent failures."
+      },
+      {
+        "letter": "C",
+        "text": "Allows handling exceptions to continue execution",
+        "correct": true,
+        "explanation": "(Correct) Manages exceptions gracefully."
+      },
+      {
+        "letter": "D",
+        "text": "Automatically corrects errors",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't auto-correct errors."
+      }
+    ],
+    "generalExplanation": "Error Handlers enable controlled exception management in microflows."
+  },
+  {
+    "question": "What is the Agile Manifesto's stance on responding to change?",
+    "domain": "Collaboration and Agile",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Following a plan is more important",
+        "correct": false,
+        "explanation": "(Incorrect) Agile values responding to change more."
+      },
+      {
+        "letter": "B",
+        "text": "Changes should be avoided late in development",
+        "correct": false,
+        "explanation": "(Incorrect) Agile welcomes late changes."
+      },
+      {
+        "letter": "C",
+        "text": "Responding to change is valued over following a plan",
+        "correct": true,
+        "explanation": "(Correct) Core Agile principle."
+      },
+      {
+        "letter": "D",
+        "text": "Change requires stakeholder approval",
+        "correct": false,
+        "explanation": "(Incorrect) Agile emphasizes quick adaptation."
+      }
+    ],
+    "generalExplanation": "The Agile Manifesto prioritizes adaptability to change over rigid planning."
+  },
+  {
+    "question": "When should you use a 'Sub microflow' call?",
+    "domain": "Microflows 2",
+    "options": [
+      {
+        "letter": "A",
+        "text": "To repeat activities in same microflow",
+        "correct": false,
+        "explanation": "(Incorrect) Better handled by loops."
+      },
+      {
+        "letter": "B",
+        "text": "To trigger from a page button",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't require sub microflow."
+      },
+      {
+        "letter": "C",
+        "text": "To perform complex operation defined elsewhere",
+        "correct": true,
+        "explanation": "(Correct) Promotes reusability."
+      },
+      {
+        "letter": "D",
+        "text": "To terminate current microflow",
+        "correct": false,
+        "explanation": "(Incorrect) Use End/Error Event instead."
+      }
+    ],
+    "generalExplanation": "Sub microflows enhance modularity by encapsulating reusable logic."
+  },
+  {
+    "question": "Which association type models Users following multiple Users?",
+    "domain": "Associations",
+    "options": [
+      {
+        "letter": "A",
+        "text": "One-to-One",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't support multiple followers."
+      },
+      {
+        "letter": "B",
+        "text": "One-to-Many",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't support reciprocal following."
+      },
+      {
+        "letter": "C",
+        "text": "Many-to-Many",
+        "correct": true,
+        "explanation": "(Correct) Supports multiple reciprocal relationships."
+      },
+      {
+        "letter": "D",
+        "text": "Self-Association",
+        "correct": false,
+        "explanation": "(Incorrect) Requires additional configuration."
+      }
+    ],
+    "generalExplanation": "Many-to-Many associations best model reciprocal user following relationships."
+  },
+  {
+    "question": "What do commit errors in Studio Pro indicate?",
+    "domain": "Microflows 2",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Unsaved changes",
+        "correct": false,
+        "explanation": "(Incorrect) Unsaved changes don't cause commit errors."
+      },
+      {
+        "letter": "B",
+        "text": "Successful commit despite errors",
+        "correct": false,
+        "explanation": "(Incorrect) Errors prevent successful commit."
+      },
+      {
+        "letter": "C",
+        "text": "Project issues needing resolution",
+        "correct": true,
+        "explanation": "(Correct) Indicates problems like missing elements."
+      },
+      {
+        "letter": "D",
+        "text": "Team Server unavailability",
+        "correct": false,
+        "explanation": "(Incorrect) Would show connectivity error."
+      }
+    ],
+    "generalExplanation": "Commit errors signal project issues that must be fixed before successful commit."
+  },
+  {
+    "question": "Recommended format for Mendix user stories?",
+    "domain": "Collaboration and Agile",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Feature-Driven Development template",
+        "correct": false,
+        "explanation": "(Incorrect) Focuses on features, not user needs."
+      },
+      {
+        "letter": "B",
+        "text": "Use Case template",
+        "correct": false,
+        "explanation": "(Incorrect) Too detailed for user stories."
+      },
+      {
+        "letter": "C",
+        "text": "Role-Feature-Reason template",
+        "correct": true,
+        "explanation": "(Correct) Clearly defines user needs."
+      },
+      {
+        "letter": "D",
+        "text": "Traditional Requirements Specification",
+        "correct": false,
+        "explanation": "(Incorrect) Too rigid for Agile."
+      }
+    ],
+    "generalExplanation": "Role-Feature-Reason template ensures clear, user-focused stories aligned with Agile."
+  },
+  {
+    "question": "Which activity updates object attributes in a microflow?",
+    "domain": "Microflows 1",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Create object",
+        "correct": false,
+        "explanation": "(Incorrect) Creates new objects."
+      },
+      {
+        "letter": "B",
+        "text": "Delete object",
+        "correct": false,
+        "explanation": "(Incorrect) Removes objects."
+      },
+      {
+        "letter": "C",
+        "text": "Change object",
+        "correct": true,
+        "explanation": "(Correct) Specifically updates attributes."
+      },
+      {
+        "letter": "D",
+        "text": "Retrieve object",
+        "correct": false,
+        "explanation": "(Incorrect) Fetches objects."
+      }
+    ],
+    "generalExplanation": "The Change object activity is designed for updating existing object attributes."
+  },
+  {
+    "question": "Best resource for learning Mendix concepts?",
+    "domain": "The Mendix Ecosystem",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Mendix Academy",
+        "correct": false,
+        "explanation": "(Incorrect) Offers courses but may not cover all concepts."
+      },
+      {
+        "letter": "B",
+        "text": "Mendix Documentation",
+        "correct": true,
+        "explanation": "(Correct) Comprehensive official resource."
+      },
+      {
+        "letter": "C",
+        "text": "Online coding tutorials",
+        "correct": false,
+        "explanation": "(Incorrect) Not Mendix-specific."
+      },
+      {
+        "letter": "D",
+        "text": "Third-party courses",
+        "correct": false,
+        "explanation": "(Incorrect) Often lack depth on Mendix specifics."
+      }
+    ],
+    "generalExplanation": "Mendix Documentation provides the most thorough and accurate information."
+  },
+  {
+    "question": "Recommended maximum decision points in a microflow?",
+    "domain": "Microflows 1",
+    "options": [
+      {
+        "letter": "A",
+        "text": "No recommended limit",
+        "correct": false,
+        "explanation": "(Incorrect) Can lead to overly complex microflows."
+      },
+      {
+        "letter": "B",
+        "text": "5 decision points",
+        "correct": true,
+        "explanation": "(Correct) Maintains readability and manageability."
+      },
+      {
+        "letter": "C",
+        "text": "10 decision points",
+        "correct": false,
+        "explanation": "(Incorrect) Can make microflows hard to maintain."
+      },
+      {
+        "letter": "D",
+        "text": "As many as needed",
+        "correct": false,
+        "explanation": "(Incorrect) Can reduce maintainability."
+      }
+    ],
+    "generalExplanation": "Limiting to 5 decision points keeps microflows simple and debuggable."
+  },
+  {
+    "question": "Which feature allows visual logic modeling without code?",
+    "domain": "General",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Data Grid",
+        "correct": false,
+        "explanation": "(Incorrect) Displays tabular data."
+      },
+      {
+        "letter": "B",
+        "text": "Microflows",
+        "correct": true,
+        "explanation": "(Correct) Visual modeling of application logic."
+      },
+      {
+        "letter": "C",
+        "text": "Layouts",
+        "correct": false,
+        "explanation": "(Incorrect) Defines page structure."
+      },
+      {
+        "letter": "D",
+        "text": "Custom Widgets",
+        "correct": false,
+        "explanation": "(Incorrect) Extends UI components."
+      }
+    ],
+    "generalExplanation": "Microflows provide powerful visual modeling of business logic without coding."
+  },
+  {
+    "question": "Purpose of 'inherited attributes' in Domain Model?",
+    "domain": "Domain Model",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Backup for recovery",
+        "correct": false,
+        "explanation": "(Incorrect) Not for backup purposes."
+      },
+      {
+        "letter": "B",
+        "text": "Child entities receive parent attributes",
+        "correct": true,
+        "explanation": "(Correct) Promotes reusability."
+      },
+      {
+        "letter": "C",
+        "text": "Mark attributes read-only",
+        "correct": false,
+        "explanation": "(Incorrect) Access control handles this."
+      },
+      {
+        "letter": "D",
+        "text": "Store historical data",
+        "correct": false,
+        "explanation": "(Incorrect) Versioning handles history."
+      }
+    ],
+    "generalExplanation": "Inherited attributes streamline models by automatically sharing parent attributes with children."
+  },
+  {
+    "question": "Term for a Mendix project checked out for editing?",
+    "domain": "General",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Repository",
+        "correct": false,
+        "explanation": "(Incorrect) Stores source code."
+      },
+      {
+        "letter": "B",
+        "text": "Branch line",
+        "correct": false,
+        "explanation": "(Incorrect) Parallel development line."
+      },
+      {
+        "letter": "C",
+        "text": "Working copy",
+        "correct": true,
+        "explanation": "(Correct) Local editable version."
+      },
+      {
+        "letter": "D",
+        "text": "Deployment package",
+        "correct": false,
+        "explanation": "(Incorrect) Compiled deployment version."
+      }
+    ],
+    "generalExplanation": "A 'working copy' is the local version being modified before committing changes."
+  },
+  {
+    "question": "Best attribute type for monetary values?",
+    "domain": "Domain Model",
+    "options": [
+      {
+        "letter": "A",
+        "text": "String",
+        "correct": false,
+        "explanation": "(Incorrect) Lacks precision for calculations."
+      },
+      {
+        "letter": "B",
+        "text": "Decimal",
+        "correct": true,
+        "explanation": "(Correct) Provides necessary precision."
+      },
+      {
+        "letter": "C",
+        "text": "Integer",
+        "correct": false,
+        "explanation": "(Incorrect) Can't handle cents/decimals."
+      },
+      {
+        "letter": "D",
+        "text": "Boolean",
+        "correct": false,
+        "explanation": "(Incorrect) Only true/false values."
+      }
+    ],
+    "generalExplanation": "Decimal is ideal for monetary values requiring precise financial calculations."
+  },
+  {
+    "question": "Primary function of Mendix Team Server?",
+    "domain": "Pages and Team Server",
+    "options": [
+      {
+        "letter": "A",
+        "text": "User authentication",
+        "correct": false,
+        "explanation": "(Incorrect) Handled by other components."
+      },
+      {
+        "letter": "B",
+        "text": "Version control and collaboration",
+        "correct": true,
+        "explanation": "(Correct) Central repository function."
+      },
+      {
+        "letter": "C",
+        "text": "Host database and services",
+        "correct": false,
+        "explanation": "(Incorrect) Handled by Mendix Cloud."
+      },
+      {
+        "letter": "D",
+        "text": "Monitor performance",
+        "correct": false,
+        "explanation": "(Incorrect) Handled by monitoring tools."
+      }
+    ],
+    "generalExplanation": "Team Server provides essential version control and team collaboration capabilities."
+  },
+  {
+    "question": "Deliverable at end of Mendix Sprint?",
+    "domain": "Collaboration and Agile",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Fully deployed product",
+        "correct": false,
+        "explanation": "(Incorrect) Result of multiple sprints."
+      },
+      {
+        "letter": "B",
+        "text": "Completed user stories",
+        "correct": true,
+        "explanation": "(Correct) Primary sprint deliverable."
+      },
+      {
+        "letter": "C",
+        "text": "Detailed stakeholder report",
+        "correct": false,
+        "explanation": "(Incorrect) Not the main deliverable."
+      },
+      {
+        "letter": "D",
+        "text": "Module prototype",
+        "correct": false,
+        "explanation": "(Incorrect) Not standard for every sprint."
+      }
+    ],
+    "generalExplanation": "Completed user stories represent the incremental progress of each sprint."
+  },
+  {
+    "question": "Purpose of 'Check security' in Studio Pro?",
+    "domain": "Security",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Scan third-party vulnerabilities",
+        "correct": false,
+        "explanation": "(Incorrect) Focuses on internal security."
+      },
+      {
+        "letter": "B",
+        "text": "Verify user passwords",
+        "correct": false,
+        "explanation": "(Incorrect) Authentication handles this."
+      },
+      {
+        "letter": "C",
+        "text": "Check against security best practices",
+        "correct": true,
+        "explanation": "(Correct) Validates security settings."
+      },
+      {
+        "letter": "D",
+        "text": "Encrypt data pre-deployment",
+        "correct": false,
+        "explanation": "(Incorrect) Specific security measure."
+      }
+    ],
+    "generalExplanation": "'Check security' validates application security configurations against best practices."
+  },
+  {
+    "question": "How to verify Mendix certification level?",
+    "domain": "The Mendix Ecosystem",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Mendix Community Profile",
+        "correct": true,
+        "explanation": "(Correct) Official certification record."
+      },
+      {
+        "letter": "B",
+        "text": "Mendix Academy dashboard",
+        "correct": false,
+        "explanation": "(Incorrect) Tracks learning progress."
+      },
+      {
+        "letter": "C",
+        "text": "App Store contributions",
+        "correct": false,
+        "explanation": "(Incorrect) Shows development activity."
+      },
+      {
+        "letter": "D",
+        "text": "Personal website badges",
+        "correct": false,
+        "explanation": "(Incorrect) Not official verification."
+      }
+    ],
+    "generalExplanation": "Community Profile provides the authoritative certification verification."
+  },
+  {
+    "question": "Which feature validates against predefined values?",
+    "domain": "Data Validation and Consistency",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Attribute constraints",
+        "correct": false,
+        "explanation": "(Incorrect) Defines value rules."
+      },
+      {
+        "letter": "B",
+        "text": "Enumeration validation",
+        "correct": true,
+        "explanation": "(Correct) Validates against enum values."
+      },
+      {
+        "letter": "C",
+        "text": "Input mask",
+        "correct": false,
+        "explanation": "(Incorrect) Formats input."
+      },
+      {
+        "letter": "D",
+        "text": "Dynamic validation",
+        "correct": false,
+        "explanation": "(Incorrect) Custom conditional logic."
+      }
+    ],
+    "generalExplanation": "Enumeration validation ensures values match predefined options."
+  },
+  {
+    "question": "Best way to document decision node reason?",
+    "domain": "Microflows 2",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Descriptive node name",
+        "correct": false,
+        "explanation": "(Incorrect) May not fully explain."
+      },
+      {
+        "letter": "B",
+        "text": "Add note/annotation",
+        "correct": true,
+        "explanation": "(Correct) Provides clear context."
+      },
+      {
+        "letter": "C",
+        "text": "Email team explanation",
+        "correct": false,
+        "explanation": "(Incorrect) Not reliably documented."
+      },
+      {
+        "letter": "D",
+        "text": "Separate documentation file",
+        "correct": false,
+        "explanation": "(Incorrect) Harder to maintain."
+      }
+    ],
+    "generalExplanation": "Annotations provide in-context documentation directly in the microflow."
+  },
+  {
+    "question": "Core Agile principle?",
+    "domain": "General",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Documentation over working software",
+        "correct": false,
+        "explanation": "(Incorrect) Agile values working software more."
+      },
+      {
+        "letter": "B",
+        "text": "Contract negotiation over collaboration",
+        "correct": false,
+        "explanation": "(Incorrect) Agile prioritizes collaboration."
+      },
+      {
+        "letter": "C",
+        "text": "Plan over responding to change",
+        "correct": false,
+        "explanation": "(Incorrect) Agile values adaptability."
+      },
+      {
+        "letter": "D",
+        "text": "Individuals and interactions over processes",
+        "correct": true,
+        "explanation": "(Correct) Fundamental Agile value."
+      }
+    ],
+    "generalExplanation": "The Agile Manifesto emphasizes people and interactions as most important."
+  },
+  {
+    "question": "Significance of association ownership mark?",
+    "domain": "Associations",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Indicates Self-Association",
+        "correct": false,
+        "explanation": "(Incorrect) Not for self-associations."
+      },
+      {
+        "letter": "B",
+        "text": "Signifies child entity",
+        "correct": false,
+        "explanation": "(Incorrect) Indicates parent status."
+      },
+      {
+        "letter": "C",
+        "text": "Denotes parent entity",
+        "correct": true,
+        "explanation": "(Correct) Controls delete behavior."
+      },
+      {
+        "letter": "D",
+        "text": "Controls delete behavior",
+        "correct": true,
+        "explanation": "(Correct) Parent manages deletion."
+      }
+    ],
+    "generalExplanation": "Ownership marks indicate parent entities that control association deletion rules."
+  },
+  {
+    "question": "Consequence of insufficient microflow permissions?",
+    "domain": "Security",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Limited functionality execution",
+        "correct": false,
+        "explanation": "(Incorrect) Microflows run fully or not at all."
+      },
+      {
+        "letter": "B",
+        "text": "Prompt to request access",
+        "correct": false,
+        "explanation": "(Incorrect) Requires custom implementation."
+      },
+      {
+        "letter": "C",
+        "text": "Microflow won't execute, shows error",
+        "correct": true,
+        "explanation": "(Correct) Prevents unauthorized execution."
+      },
+      {
+        "letter": "D",
+        "text": "Terminates user session",
+        "correct": false,
+        "explanation": "(Incorrect) Keeps user logged in."
+      }
+    ],
+    "generalExplanation": "Mendix enforces security by blocking unauthorized microflow execution."
+  },
+  {
+    "question": "Main advantage of Mendix Feedback Widget?",
+    "domain": "The Mendix Ecosystem",
+    "options": [
+      {
+        "letter": "A",
+        "text": "In-app tutorial",
+        "correct": false,
+        "explanation": "Incorrect: Not for tutorials."
+      },
+      {
+        "letter": "B",
+        "text": "Report bugs/request features in-app",
+        "correct": true,
+        "explanation": "Correct: Direct user feedback channel."
+      },
+      {
+        "letter": "C",
+        "text": "Chat with Mendix support",
+        "correct": false,
+        "explanation": "Incorrect: No direct support chat."
+      },
+      {
+        "letter": "D",
+        "text": "UI customization",
+        "correct": false,
+        "explanation": "Incorrect: Not for UI changes."
+      }
+    ],
+    "generalExplanation": "Feedback Widget enables direct in-app bug reporting and feature requests."
+  },
+  {
+    "question": "How to track role/permission changes?",
+    "domain": "Security",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Database change tracking",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't track security config."
+      },
+      {
+        "letter": "B",
+        "text": "Version control system",
+        "correct": true,
+        "explanation": "(Correct) Tracks configuration changes."
+      },
+      {
+        "letter": "C",
+        "text": "Manual external log",
+        "correct": false,
+        "explanation": "(Incorrect) Prone to human error."
+      },
+      {
+        "letter": "D",
+        "text": "Email notifications",
+        "correct": false,
+        "explanation": "(Incorrect) Alerts but doesn't track."
+      }
+    ],
+    "generalExplanation": "Version control provides automated, reliable change history for security configurations."
+  },
+  {
+    "question": "Central repository for version control?",
+    "domain": "The Mendix Ecosystem",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Mendix App Store",
+        "correct": false,
+        "explanation": "Incorrect: Marketplace for components."
+      },
+      {
+        "letter": "B",
+        "text": "Mendix Team Server",
+        "correct": true,
+        "explanation": "Correct: Version control system."
+      },
+      {
+        "letter": "C",
+        "text": "Mendix Model Share",
+        "correct": false,
+        "explanation": "Incorrect: For sharing models."
+      },
+      {
+        "letter": "D",
+        "text": "Mendix Cloud",
+        "correct": false,
+        "explanation": "Incorrect: Deployment platform."
+      }
+    ],
+    "generalExplanation": "Team Server is Mendix's dedicated version control and collaboration hub."
+  },
+  {
+    "question": "How to handle validation errors in microflow?",
+    "domain": "Data Validation and Consistency",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Use 'Error handler' activity",
+        "correct": true,
+        "explanation": "(Correct) Directly manages exceptions."
+      },
+      {
+        "letter": "B",
+        "text": "Redirect to error page",
+        "correct": false,
+        "explanation": "(Incorrect) UI solution, not handling."
+      },
+      {
+        "letter": "C",
+        "text": "Email administrator",
+        "correct": false,
+        "explanation": "(Incorrect) Notification isn't handling."
+      },
+      {
+        "letter": "D",
+        "text": "Log to console",
+        "correct": false,
+        "explanation": "(Incorrect) Helps debugging only."
+      }
+    ],
+    "generalExplanation": "Error handlers provide proper microflow-level exception management."
+  },
+  {
+    "question": "Effect of 'cascading delete' on association?",
+    "domain": "Associations",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Deletes parent when child deleted",
+        "correct": false,
+        "explanation": "(Incorrect) Works in opposite direction."
+      },
+      {
+        "letter": "B",
+        "text": "Deletes children when parent deleted",
+        "correct": true,
+        "explanation": "(Correct) Maintains data integrity."
+      },
+      {
+        "letter": "C",
+        "text": "Cascades updates",
+        "correct": false,
+        "explanation": "(Incorrect) About deletion, not updates."
+      },
+      {
+        "letter": "D",
+        "text": "Prevents deletion with children",
+        "correct": false,
+        "explanation": "(Incorrect) Actually performs deletion."
+      }
+    ],
+    "generalExplanation": "Cascading delete automatically removes child objects when parent is deleted."
+  },
+  {
+    "question": "Purpose of 'exclusive ownership' association?",
+    "domain": "Domain Model",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Shared ownership",
+        "correct": false,
+        "explanation": "(Incorrect) Opposite of exclusive."
+      },
+      {
+        "letter": "B",
+        "text": "Single owner per object",
+        "correct": true,
+        "explanation": "(Correct) One-to-one ownership."
+      },
+      {
+        "letter": "C",
+        "text": "Public access",
+        "correct": false,
+        "explanation": "(Incorrect) Unrelated to access."
+      },
+      {
+        "letter": "D",
+        "text": "Shared attributes",
+        "correct": false,
+        "explanation": "(Incorrect) Not about attributes."
+      }
+    ],
+    "generalExplanation": "Exclusive ownership ensures unambiguous one-to-one ownership relationships."
+  },
+  {
+    "question": "Best practice for naming Customer-Order association?",
+    "domain": "Domain Model",
+    "options": [
+      {
+        "letter": "A",
+        "text": "'CustomerOrder'",
+        "correct": false,
+        "explanation": "(Incorrect) Not descriptive enough."
+      },
+      {
+        "letter": "B",
+        "text": "Default name",
+        "correct": false,
+        "explanation": "(Incorrect) May not be clear."
+      },
+      {
+        "letter": "C",
+        "text": "'HasOrders' from Customer",
+        "correct": true,
+        "explanation": "(Correct) Clear relationship description."
+      },
+      {
+        "letter": "D",
+        "text": "'IsPlacedBy' from Order",
+        "correct": true,
+        "explanation": "(Correct) Alternative clear description."
+      }
+    ],
+    "generalExplanation": "Descriptive association names clarify relationships in the domain model."
+  },
+  {
+    "question": "What determines entity relationships in Domain Model?",
+    "domain": "Domain Model",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Association names",
+        "correct": false,
+        "explanation": "(Incorrect) Names are just labels."
+      },
+      {
+        "letter": "B",
+        "text": "Attribute types",
+        "correct": false,
+        "explanation": "(Incorrect) Define data characteristics."
+      },
+      {
+        "letter": "C",
+        "text": "Entity access rules",
+        "correct": false,
+        "explanation": "(Incorrect) Control permissions."
+      },
+      {
+        "letter": "D",
+        "text": "Entity associations",
+        "correct": true,
+        "explanation": "(Correct) Define relationship types."
+      }
+    ],
+    "generalExplanation": "Associations establish and define all inter-entity relationships."
+  },
+  {
+    "question": "Significance of microflow 'Annotation'?",
+    "domain": "Microflows 1",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Documents purpose/logic",
+        "correct": true,
+        "explanation": "(Correct) Provides explanation."
+      },
+      {
+        "letter": "B",
+        "text": "Changes execution path",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't affect flow."
+      },
+      {
+        "letter": "C",
+        "text": "Placeholder for future logic",
+        "correct": false,
+        "explanation": "(Incorrect) Not for placeholders."
+      },
+      {
+        "letter": "D",
+        "text": "Debugging breakpoint",
+        "correct": false,
+        "explanation": "(Incorrect) Breakpoints are separate."
+      }
+    ],
+    "generalExplanation": "Annotations document microflow logic for better understanding and maintenance."
+  },
+  {
+    "question": "Best practice for committing changes in Team Server?",
+    "domain": "Pages and Team Server",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Frequent commits with clear messages",
+        "correct": true,
+        "explanation": "(Correct) Enables better tracking."
+      },
+      {
+        "letter": "B",
+        "text": "Commit only at sprint end",
+        "correct": false,
+        "explanation": "(Incorrect) Causes large complex commits."
+      },
+      {
+        "letter": "C",
+        "text": "Commit without messages",
+        "correct": false,
+        "explanation": "(Incorrect) Loses critical context."
+      },
+      {
+        "letter": "D",
+        "text": "Single large batch commits",
+        "correct": false,
+        "explanation": "(Incorrect) Hard to manage."
+      }
+    ],
+    "generalExplanation": "Frequent, well-documented commits facilitate collaboration and issue tracking."
+  },
+  {
+    "question": "How to restrict attribute-level data access?",
+    "domain": "Security",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Attribute properties",
+        "correct": false,
+        "explanation": "(Incorrect) Define characteristics."
+      },
+      {
+        "letter": "B",
+        "text": "XPath constraints",
+        "correct": false,
+        "explanation": "(Incorrect) Entity-level filtering."
+      },
+      {
+        "letter": "C",
+        "text": "Entity access rules",
+        "correct": true,
+        "explanation": "(Correct) Manages attribute access."
+      },
+      {
+        "letter": "D",
+        "text": "Validation feedback",
+        "correct": false,
+        "explanation": "(Incorrect) For error messages."
+      }
+    ],
+    "generalExplanation": "Entity access rules provide granular control over attribute-level permissions."
+  },
+  {
+    "question": "Where to define validation rules?",
+    "domain": "Data Validation and Consistency",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Domain model entity properties",
+        "correct": true,
+        "explanation": "(Correct) Enforces data integrity."
+      },
+      {
+        "letter": "B",
+        "text": "Page layout",
+        "correct": false,
+        "explanation": "(Incorrect) For UI design."
+      },
+      {
+        "letter": "C",
+        "text": "Nanoflow logic",
+        "correct": false,
+        "explanation": "(Incorrect) Client-side only."
+      },
+      {
+        "letter": "D",
+        "text": "Module security",
+        "correct": false,
+        "explanation": "(Incorrect) Manages access."
+      }
+    ],
+    "generalExplanation": "Validation rules belong in domain model for consistent data enforcement."
+  },
+  {
+    "question": "Significance of uniform layout?",
+    "domain": "Pages and Team Server",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Reduces microflows",
+        "correct": false,
+        "explanation": "(Incorrect) Unrelated to microflows."
+      },
+      {
+        "letter": "B",
+        "text": "Easier data migration",
+        "correct": false,
+        "explanation": "(Incorrect) Database concern."
+      },
+      {
+        "letter": "C",
+        "text": "Better user experience",
+        "correct": true,
+        "explanation": "(Correct) Consistency improves UX."
+      },
+      {
+        "letter": "D",
+        "text": "Reduces app size",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't affect size."
+      }
+    ],
+    "generalExplanation": "Uniform layouts create predictable, user-friendly interfaces."
+  },
+  {
+    "question": "Effect of 'Delete the object(s)' association behavior?",
+    "domain": "Data Validation and Consistency",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Clears attributes",
+        "correct": false,
+        "explanation": "(Incorrect) Deletes entire object."
+      },
+      {
+        "letter": "B",
+        "text": "Deletes associated objects",
+        "correct": true,
+        "explanation": "(Correct) Cascades deletion."
+      },
+      {
+        "letter": "C",
+        "text": "Removes association",
+        "correct": false,
+        "explanation": "(Incorrect) Keeps association."
+      },
+      {
+        "letter": "D",
+        "text": "Disassociates objects",
+        "correct": false,
+        "explanation": "(Incorrect) Actually deletes."
+      }
+    ],
+    "generalExplanation": "This setting ensures dependent objects are deleted with their owner."
+  },
+  {
+    "question": "Association type ensuring OrderLine requires Order?",
+    "domain": "Associations",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Many-to-Many",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't enforce dependency."
+      },
+      {
+        "letter": "B",
+        "text": "One-to-Many with 'dependent'",
+        "correct": true,
+        "explanation": "(Correct) Enforces required relationship."
+      },
+      {
+        "letter": "C",
+        "text": "One-to-One",
+        "correct": false,
+        "explanation": "(Incorrect) Doesn't handle multiple lines."
+      },
+      {
+        "letter": "D",
+        "text": "Self-Association",
+        "correct": false,
+        "explanation": "(Incorrect) Links same entity type."
+      }
+    ],
+    "generalExplanation": "Dependent One-to-Many ensures OrderLines cannot exist without their Order."
+  },
+  {
+    "question": "What does 'Start Event' signify in microflow?",
+    "domain": "Microflows 2",
+    "options": [
+      {
+        "letter": "A",
+        "text": "End of execution",
+        "correct": false,
+        "explanation": "(Incorrect) Marks beginning."
+      },
+      {
+        "letter": "B",
+        "text": "Triggers external process",
+        "correct": false,
+        "explanation": "(Incorrect) Internal to microflow."
+      },
+      {
+        "letter": "C",
+        "text": "Beginning of execution",
+        "correct": true,
+        "explanation": "(Correct) Initiates the microflow."
+      },
+      {
+        "letter": "D",
+        "text": "Error occurrence",
+        "correct": false,
+        "explanation": "(Incorrect) Error events handle exceptions."
+      }
+    ],
+    "generalExplanation": "The Start Event is the entry point that triggers microflow execution."
+  },
+  {
+    "question": "Best practice for password management?",
+    "domain": "Security",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Store plain text",
+        "correct": false,
+        "explanation": "(Incorrect) Major security risk."
+      },
+      {
+        "letter": "B",
+        "text": "Common default password",
+        "correct": false,
+        "explanation": "(Incorrect) Security vulnerability."
+      },
+      {
+        "letter": "C",
+        "text": "Strong policies and secure storage",
+        "correct": true,
+        "explanation": "(Correct) Industry standard practice."
+      },
+      {
+        "letter": "D",
+        "text": "No restrictions",
+        "correct": false,
+        "explanation": "(Incorrect) Allows weak passwords."
+      }
+    ],
+    "generalExplanation": "Strong password policies with secure storage (hashing/salting) are essential for security."
+  },
+  {
+    "question": "Significance of 'Error event' in microflow?",
+    "domain": "Microflows 1",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Shows user error message",
+        "correct": false,
+        "explanation": "(Incorrect) Handles exceptions internally."
+      },
+      {
+        "letter": "B",
+        "text": "Handles execution exceptions",
+        "correct": true,
+        "explanation": "(Correct) Manages flow errors."
+      },
+      {
+        "letter": "C",
+        "text": "Logs to console",
+        "correct": false,
+        "explanation": "(Incorrect) Can include logging but not primary purpose."
+      },
+      {
+        "letter": "D",
+        "text": "Reverts all changes",
+        "correct": false,
+        "explanation": "(Incorrect) Requires additional rollback logic."
+      }
+    ],
+    "generalExplanation": "Error events provide structured exception handling within microflows."
+  }
+];
+
+        // Variables de estado
+        let currentQuestion = 0;
+        let selectedOption = null;
+        let answers = Array(examData.length).fill(null);
+        let score = 0;
+        let timer;
+        let timeLeft = 60 * 60; // 60 minutos en segundos
+
+        // Elementos del DOM
+        const questionContainer = document.getElementById('question-container');
+        const resultsContainer = document.getElementById('results-container');
+        const progressBar = document.getElementById('progress');
+        const progressText = document.getElementById('progress-text');
+        const timeDisplay = document.getElementById('time');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Inicializar el examen
+        function initExam() {
+            updateQuestion();
+            startTimer();
+            
+            // Event listeners para las opciones
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    if (!answers[currentQuestion]) { // Solo permitir selección si no se ha respondido
+                        selectOption(this);
+                    }
+                });
+            });
+            
+            // Event listeners para los botones de navegación
+            document.querySelector('.btn-prev').addEventListener('click', prevQuestion);
+            document.querySelector('.btn-next').addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restartExam);
+        }
+
+        // Actualizar la pregunta actual
+        function updateQuestion() {
+            const question = examData[currentQuestion];
+            
+            // Actualizar el número de pregunta y dominio
+            document.querySelector('.question-number').textContent = `Pregunta ${currentQuestion + 1}`;
+            document.querySelector('.domain-tag').textContent = question.domain;
+            
+            // Actualizar el texto de la pregunta
+            document.querySelector('.question-text').textContent = question.question;
+            
+            // Actualizar las opciones
+            const options = document.querySelectorAll('.option');
+            question.options.forEach((option, index) => {
+                options[index].querySelector('.option-text').textContent = option.text;
+                options[index].className = 'option';
+                options[index].classList.add('fade-in');
+                
+                // Marcar si ya fue respondida
+                if (answers[currentQuestion] === option.letter) {
+                    options[index].classList.add('selected');
+                    if (option.correct) {
+                        options[index].classList.add('correct');
+                    } else {
+                        options[index].classList.add('incorrect');
+                    }
+                }
+            });
+            
+            // Actualizar feedback si ya fue respondida
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback-container';
+            
+            if (answers[currentQuestion] !== null) {
+                const selected = question.options.find(opt => opt.letter === answers[currentQuestion]);
+                if (selected.correct) {
+                    feedback.classList.add('correct-feedback', 'show');
+                    feedback.querySelector('.feedback-header i').className = 'fas fa-check-circle';
+                    feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es correcta';
+                } else {
+                    feedback.classList.add('incorrect-feedback', 'show');
+                    feedback.querySelector('.feedback-header i').className = 'fas fa-times-circle';
+                    feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es incorrecta';
+                }
+                
+                feedback.querySelector('.explanation').textContent = selected.explanation;
+                feedback.querySelector('.general-explanation').textContent = question.generalExplanation;
+            }
+            
+            // Actualizar progreso
+            progressBar.value = currentQuestion + 1;
+            progressText.textContent = `${currentQuestion + 1}/${examData.length}`;
+            
+            // Actualizar botones de navegación
+            document.querySelector('.btn-prev').disabled = currentQuestion === 0;
+            
+            if (currentQuestion === examData.length - 1) {
+                document.querySelector('.btn-next').className = 'btn-submit';
+                document.querySelector('.btn-next').innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Examen';
+            } else {
+                document.querySelector('.btn-next').className = 'btn-next';
+                document.querySelector('.btn-next').innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+            }
+        }
+
+        // Seleccionar una opción
+        function selectOption(optionElement) {
+            // Deseleccionar cualquier opción previa
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Seleccionar la nueva opción
+            optionElement.classList.add('selected');
+            selectedOption = optionElement.getAttribute('data-option');
+            
+            // Guardar la respuesta
+            answers[currentQuestion] = selectedOption;
+            
+            // Mostrar feedback
+            const question = examData[currentQuestion];
+            const selected = question.options.find(opt => opt.letter === selectedOption);
+            const feedback = document.getElementById('feedback');
+            
+            feedback.className = 'feedback-container show';
+            if (selected.correct) {
+                feedback.classList.add('correct-feedback');
+                feedback.querySelector('.feedback-header i').className = 'fas fa-check-circle';
+                feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es correcta';
+                score++;
+            } else {
+                feedback.classList.add('incorrect-feedback');
+                feedback.querySelector('.feedback-header i').className = 'fas fa-times-circle';
+                feedback.querySelector('.feedback-header span').textContent = 'Tu respuesta es incorrecta';
+                
+                // Resaltar la respuesta correcta
+                const correctOption = document.querySelector(`.option[data-option="${question.options.find(opt => opt.correct).letter}"]`);
+                correctOption.classList.add('correct');
+            }
+            
+            feedback.querySelector('.explanation').textContent = selected.explanation;
+            feedback.querySelector('.general-explanation').textContent = question.generalExplanation;
+        }
+
+        // Navegar a la pregunta anterior
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                updateQuestion();
+            }
+        }
+
+        // Navegar a la siguiente pregunta
+        function nextQuestion() {
+            if (currentQuestion < examData.length - 1) {
+                currentQuestion++;
+                updateQuestion();
+            } else {
+                finishExam();
+            }
+        }
+
+        // Finalizar el examen
+        function finishExam() {
+            clearInterval(timer);
+            
+            // Calcular puntaje
+            const correctAnswers = answers.reduce((count, answer, index) => {
+                if (answer) {
+                    const question = examData[index];
+                    const selected = question.options.find(opt => opt.letter === answer);
+                    return count + (selected.correct ? 1 : 0);
+                }
+                return count;
+            }, 0);
+            
+            const percentage = Math.round((correctAnswers / examData.length) * 100);
+            
+            // Mostrar resultados
+            questionContainer.style.display = 'none';
+            resultsContainer.classList.add('show', 'fade-in');
+            
+            document.querySelector('.results-score').textContent = `${percentage}%`;
+            document.querySelector('.correct-stat .stat-number').textContent = correctAnswers;
+            document.querySelector('.incorrect-stat .stat-number').textContent = examData.length - correctAnswers;
+            
+            // Cambiar icono según el puntaje
+            const resultsIcon = document.querySelector('.results-icon');
+            if (percentage >= 80) {
+                resultsIcon.className = 'results-icon success-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-trophy"></i>';
+                document.querySelector('.results-title').textContent = '¡Excelente trabajo!';
+            } else if (percentage >= 60) {
+                resultsIcon.className = 'results-icon warning-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-award"></i>';
+                document.querySelector('.results-title').textContent = '¡Buen trabajo!';
+            } else {
+                resultsIcon.className = 'results-icon';
+                resultsIcon.innerHTML = '<i class="fas fa-book"></i>';
+                document.querySelector('.results-title').textContent = '¡Sigue practicando!';
+            }
+        }
+
+        // Reiniciar el examen
+        function restartExam() {
+            currentQuestion = 0;
+            selectedOption = null;
+            answers = Array(examData.length).fill(null);
+            score = 0;
+            timeLeft = 60 * 60;
+            
+            resultsContainer.classList.remove('show');
+            questionContainer.style.display = 'block';
+            
+            updateQuestion();
+            startTimer();
+        }
+
+        // Temporizador
+        function startTimer() {
+            clearInterval(timer);
+            updateTimerDisplay();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Cambiar color cuando quedan 5 minutos
+            if (timeLeft <= 300) { // 5 minutos = 300 segundos
+                timeDisplay.style.color = 'var(--error-color)';
+            }
+        }
+
+        // Iniciar la aplicación
+        initExam();
+    </script>
+</body>
+</html>
