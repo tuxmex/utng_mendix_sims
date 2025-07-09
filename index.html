@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simuladores de Certificación Mendix 2025 - UTNG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .exam-date {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .logos-section {
+            padding: 30px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .logos-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .logo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .logo-placeholder {
+            width: 120px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .logo-item span {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .simulators-section {
+            padding: 40px 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+
+        .section-title p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .simulators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .simulator-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .simulator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .simulator-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .card-icon::before {
+            content: '📝';
+            font-size: 24px;
+        }
+
+        .card-header h3 {
+            color: #1a237e;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .card-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card-features {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .card-features li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 25px;
+            color: #555;
+        }
+
+        .card-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .card-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .card-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .certification-level {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            background: #1a237e;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+        }
+
+        .footer-links a {
+            color: #64b5f6;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .logos-container {
+                gap: 20px;
+            }
+            
+            .logo-placeholder {
+                width: 100px;
+                height: 50px;
+                font-size: 12px;
+            }
+            
+            .simulators-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <h1>🎯 Simuladores de Certificación Mendix 2025</h1>
+                <p>Prepárate para el éxito con los mejores recursos de práctica</p>
+                <div class="exam-date">
+                    📅 Fecha del Examen: 5 de Agosto 2025 - 16:00 Hrs.
+                </div>
+            </div>
+        </div>
+
+        <!-- Logos Section -->
+        <div class="logos-section">
+            <div class="logos-container">
+                <div class="logo-item">
+                    <div class="logo-placeholder"><img  src="assets/mendix-logo.svg" width="200px"/></div>
+                    <span>Plataforma Low-Code</span>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-placeholder">SIEMENS</div>
+                    <span>Tecnología Industrial</span>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-placeholder">UTNG</div>
+                    <span>Universidad Tecnológica</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulators Section -->
+        <div class="simulators-section">
+            <div class="section-title">
+                <h2>🚀 Simuladores de Práctica Recomendados</h2>
+                <p>Recursos especializados para cada nivel de certificación Mendix</p>
+            </div>
+
+            <div class="simulators-grid">
+                <!-- Simulator 1: Mendix Academy Oficial -->
+                <div class="simulator-card">
+                    <div class="certification-level">🏆Rapid Mendix</div>
+                    <div class="card-header">
+                        <div class="card-icon"></div>
+                        <h3>Mendix Academy - Simulador Oficial</h3>
+                    </div>
+                    <div class="card-description">
+                        Plataforma oficial de Mendix con cursos completos de 24 horas y exámenes de práctica integrados. Incluye videos de entrenamiento, teoría, cuestionarios y asignaciones prácticas.
+                    </div>
+                    <ul class="card-features">
+                        <li>Contenido oficial y actualizado 2025</li>
+                        <li>Simuladores para todos los niveles</li>
+                        <li>Certificación gratuita incluida</li>
+                        <li>Acceso a Mendix Studio Pro</li>
+                        <li>Soporte de la comunidad</li>
+                    </ul>
+                    <a href="https://academy.mendix.com/" class="card-button" target="_blank">
+                        Acceder al Simulador
+                    </a>
+                </div>
+
+                <!-- Simulator 2: Udemy Rapid Developer -->
+                <div class="simulator-card">
+                    <div class="certification-level">⚡ Rapid Developer</div>
+                    <div class="card-header">
+                        <div class="card-icon"></div>
+                        <h3>Udemy - Rapid Developer Practice</h3>
+                    </div>
+                    <div class="card-description">
+                        Exámenes comprehensivos de práctica con 5 tests detallados de 50 preguntas cada uno. Simula el ambiente real del examen con cronometraje y calificación automática.
+                    </div>
+                    <ul class="card-features">
+                        <li>5 exámenes completos de práctica</li>
+                        <li>250 preguntas únicas</li>
+                        <li>Ambiente de examen realista</li>
+                        <li>Explicaciones detalladas</li>
+                        <li>Acceso de por vida</li>
+                    </ul>
+                    <a href="https://www.udemy.com/course/mendix-rapid-developer-mendix-development-practice-test/" class="card-button" target="_blank">
+                        Iniciar Práctica
+                    </a>
+                </div>
+
+                <!-- Simulator 3: Udemy Intermediate Developer -->
+                <div class="simulator-card">
+                    <div class="certification-level">🎯 Intermediate Level</div>
+                    <div class="card-header">
+                        <div class="card-icon"></div>
+                        <h3>Udemy - Intermediate Certification</h3>
+                    </div>
+                    <div class="card-description">
+                        Preparación completa para desarrolladores intermedios con enfoque en arquitectura, seguridad y optimización de rendimiento. Incluye retroalimentación de expertos certificados.
+                    </div>
+                    <ul class="card-features">
+                        <li>Basado en feedback de expertos</li>
+                        <li>Explicaciones detalladas</li>
+                        <li>Escenarios prácticos reales</li>
+                        <li>50 preguntas por examen</li>
+                        <li>75% score requerido</li>
+                    </ul>
+                    <a href="https://www.udemy.com/course/mendix-intermediate-developer/" class="card-button" target="_blank">
+                        Practicar Intermedio
+                    </a>
+                </div>
+
+                <!-- Simulator 4: Udemy Advanced Developer -->
+                <div class="simulator-card">
+                    <div class="certification-level">🏅 Advanced Level</div>
+                    <div class="card-header">
+                        <div class="card-icon"></div>
+                        <h3>Udemy - Advanced Developer Prep</h3>
+                    </div>
+                    <div class="card-description">
+                        Simulador especializado para desarrolladores avanzados que buscan dominar conceptos complejos de arquitectura, seguridad y optimización de rendimiento en Mendix.
+                    </div>
+                    <ul class="card-features">
+                        <li>Preguntas de nivel experto</li>
+                        <li>Arquitectura y mejores prácticas</li>
+                        <li>Seguridad avanzada</li>
+                        <li>Optimización de rendimiento</li>
+                        <li>Preparación para entrevista</li>
+                    </ul>
+                    <a href="https://www.udemy.com/course/mendix-advanced-developer/" class="card-button" target="_blank">
+                        Dominar Avanzado
+                    </a>
+                </div>
+
+                <!-- Simulator 5: Mayon Academy -->
+                <div class="simulator-card">
+                    <div class="certification-level">🌟 Partner Oficial</div>
+                    <div class="card-header">
+                        <div class="card-icon"></div>
+                        <h3>Mayon Academy - Siemens Partner</h3>
+                    </div>
+                    <div class="card-description">
+                        Único partner oficial de entrenamiento Siemens Mendix en India. Ofrece programas completos con instructores certificados y experiencia práctica en proyectos reales.
+                    </div>
+                    <ul class="card-features">
+                        <li>Partner oficial Siemens</li>
+                        <li>Instructores certificados</li>
+                        <li>Experiencia práctica real</li>
+                        <li>Entrenamiento corporativo</li>
+                        <li>Certificación incluida</li>
+                    </ul>
+                    <a href="https://www.mayonacademy.com/" class="card-button" target="_blank">
+                        Explorar Programa
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Universidad Tecnológica del Norte de Guanajuato</strong></p>
+            <p>Programa de Certificación Mendix 2025</p>
+            <div class="footer-links">
+                <a href="https://mendix.com">Mendix Official</a>
+                <a href="https://siemens.com">Siemens</a>
+                <a href="#">UTNG Portal</a>
+            </div>
+            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">
+                🎓 ¡Prepárate para el futuro del desarrollo Low-Code!
+            </p>
+        </div>
+    </div>
+</body>
+</html>
