@@ -3,1051 +3,889 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mendix Certification Exam Simulator</title>
+    <title>Mendix Exam Simulator</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-            margin: 0;
-            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #333;
         }
+
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
+            max-width: 900px;
+            width: 95%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #003366;
             text-align: center;
-            margin-bottom: 30px;
-        }
-        .header-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .timer-container {
-            background-color: #f0f8ff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: #0066cc;
-        }
-        .question-container {
-            margin-bottom: 25px;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-            display: none;
-        }
-        .question-container.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .question {
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        .options {
-            margin-left: 10px;
-        }
-        .option {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
             position: relative;
         }
-        .option:hover {
-            background-color: #e6f2ff;
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        .option.selected {
-            background-color: #cce5ff;
-            border-left: 4px solid #0066cc;
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
         }
-        .option.correct {
-            background-color: #d4edda;
-            border-left: 4px solid #28a745;
-        }
-        .option.incorrect {
-            background-color: #f8d7da;
-            border-left: 4px solid #dc3545;
-        }
-        .feedback {
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 5px;
-            display: none;
-            animation: slideIn 0.3s;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .correct-feedback {
-            background-color: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
-        }
-        .incorrect-feedback {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-        .navigation {
+
+        .stats-bar {
             display: flex;
             justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
             margin-top: 20px;
+            border-radius: 15px;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #0066cc;
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .timer {
+            background: #ff4757;
             color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: inline-block;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .welcome-screen h2 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen p {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 40px;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
-        button:hover {
-            background-color: #0052a3;
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
         }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
         }
-        .progress-container {
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 20px 0;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
         }
+
+        .question-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
         .progress-bar {
-            flex-grow: 1;
-            height: 10px;
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            margin: 0 15px;
+            flex: 1;
+            margin: 0 20px;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 10px;
             overflow: hidden;
         }
+
         .progress-fill {
             height: 100%;
-            background-color: #28a745;
-            width: 0%;
-            transition: width 0.5s;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
         }
-        .score-display {
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #ecf0f1;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        }
+
+        .option.correct {
+            border-color: #2ecc71;
+            background: linear-gradient(135deg, #2ecc7115 0%, #27ae6015 100%);
+            animation: correctAnswer 0.6s ease;
+        }
+
+        .option.incorrect {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c15 0%, #c0392b15 100%);
+            animation: incorrectAnswer 0.6s ease;
+        }
+
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectAnswer {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .option-letter {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
             font-weight: bold;
-            color: #0066cc;
-            min-width: 80px;
-            text-align: right;
+            margin-right: 15px;
+            transition: all 0.3s ease;
         }
-        .results {
+
+        .option.correct .option-letter {
+            background: #2ecc71;
+        }
+
+        .option.incorrect .option-letter {
+            background: #e74c3c;
+        }
+
+        .option-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .feedback {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 15px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .feedback h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feedback-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-screen {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 40px;
         }
-        .score {
-            font-size: 24px;
+
+        .results-header {
+            margin-bottom: 40px;
+        }
+
+        .results-header h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
             font-weight: bold;
-            margin: 20px 0;
-            color: #0066cc;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
-        .time-summary {
-            font-size: 18px;
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #f0f8ff;
-            border-radius: 5px;
+
+        .score-circle.excellent {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
         }
+
+        .score-circle.good {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .score-circle.needs-improvement {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .result-stat {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #667eea;
+        }
+
+        .result-stat h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .result-stat .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
         .restart-btn {
-            margin-top: 20px;
-        }
-        .question-number {
-            color: #666;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        .correct-answer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #28a745;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
         }
-        .explanation {
-            margin-top: 10px;
-            font-style: italic;
+
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
-        .time-warning {
-            color: #dc3545;
-            font-weight: bold;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .question-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .progress-bar {
+                margin: 0;
+            }
+
+            .question-text {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Mendix Certification Exam Simulator</h1>
-        
-        <div class="header-info">
-            <div class="timer-container">
-                Time: <span id="timer">00:00:00</span>
-            </div>
-            <div class="score-display" id="score-display">Score: 0%</div>
-        </div>
-        
-        <div id="quiz-container">
-            <div class="progress-container">
-                <div id="question-counter">Question 1 of 50</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
+        <div class="header">
+            <h1>🎓 Mendix Certification Simulator</h1>
+            <p>Master your Mendix skills with this interactive exam simulator</p>
+            
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalQuestions">50</span>
+                    <span class="stat-label">Total Questions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="currentQuestion">0</span>
+                    <span class="stat-label">Current</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="correctAnswers">0</span>
+                    <span class="stat-label">Correct</span>
+                </div>
+                <div class="stat-item">
+                    <span class="timer" id="timer">00:00</span>
+                    <span class="stat-label">Time</span>
                 </div>
             </div>
-            
-            <div id="question-container" class="question-container active">
-                <div class="question-number" id="question-number">Question 1</div>
-                <div class="question" id="question"></div>
-                <div class="options" id="options"></div>
-                <div class="feedback" id="feedback"></div>
-            </div>
-            
-            <div class="navigation">
-                <button id="prev-btn" disabled>Previous</button>
-                <button id="next-btn">Next</button>
-                <button id="submit-btn" style="display: none;">Submit Exam</button>
-            </div>
         </div>
-        
-        <div id="results" class="results">
-            <h2>Exam Results</h2>
-            <div class="score" id="score"></div>
-            <div class="time-summary" id="time-summary"></div>
-            <div id="detailed-results"></div>
-            <button class="restart-btn" id="restart-btn">Restart Exam</button>
+
+        <div class="content">
+            <!-- Welcome Screen -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <h2>🚀 Ready to Test Your Mendix Knowledge?</h2>
+                <p>This simulator contains 50 questions covering all major Mendix topics including Security, Microflows, Domain Modeling, and more. You'll get immediate feedback on each question to help you learn.</p>
+                <button class="start-btn" onclick="startExam()">Start Exam</button>
+            </div>
+
+            <!-- Question Container -->
+            <div class="question-container" id="questionContainer">
+                <div class="question-header">
+                    <div class="question-number" id="questionNumber">Question 1 of 50</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="question-text" id="questionText"></div>
+
+                <div class="options-container" id="optionsContainer"></div>
+
+                <div class="feedback" id="feedback">
+                    <h3 id="feedbackTitle"></h3>
+                    <p id="feedbackText"></p>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>Previous</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div class="results-screen" id="resultsScreen">
+                <div class="results-header">
+                    <h2>🎉 Exam Complete!</h2>
+                    <div class="score-circle" id="scoreCircle">
+                        <span id="finalScore">0%</span>
+                    </div>
+                    <p id="scoreMessage"></p>
+                </div>
+
+                <div class="results-stats">
+                    <div class="result-stat">
+                        <h3>Total Questions</h3>
+                        <div class="value" id="resultTotal">50</div>
+                    </div>
+                    <div class="result-stat">
+                        <h3>Correct Answers</h3>
+                        <div class="value" id="resultCorrect">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <h3>Accuracy</h3>
+                        <div class="value" id="resultAccuracy">0%</div>
+                    </div>
+                    <div class="result-stat">
+                        <h3>Time Taken</h3>
+                        <div class="value" id="resultTime">00:00</div>
+                    </div>
+                </div>
+
+                <button class="restart-btn" onclick="restartExam()">Try Again</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Questions and answers
-               // Questions and answers
+        // Questions data
         const questions = [
             {
-                question: "Which widget in Mendix is most suitable for creating a dynamic list of objects that are associated with a specific object through a One-to-Many Association?",
+                question: "Where is the central location for managing an application's comprehensive security settings in Mendix?",
                 options: [
-                    "Data Grid",
+                    "In the Environment settings under Project Dashboard",
+                    "In the Modeler under the 'Security' tab",
+                    "Within the Marketplace module configuration",
+                    "In the Project Settings under 'Security' level"
+                ],
+                correct: 1,
+                explanation: "The 'Security' tab in the Mendix Modeler is the central location for managing an application's comprehensive security settings, including user roles, module roles, and access rules."
+            },
+            {
+                question: "What is the purpose of a 'decision' activity in a Mendix microflow?",
+                options: [
+                    "To perform calculations and data manipulations",
+                    "To determine the flow direction based on a condition",
+                    "To merge multiple flows into a single path",
+                    "To start or end the microflow"
+                ],
+                correct: 1,
+                explanation: "A 'decision' activity in a Mendix microflow is used to evaluate a condition and direct the flow based on whether the condition is true or false."
+            },
+            {
+                question: "Which microflow activity in Mendix is used to roll back changes made to an object?",
+                options: [
+                    "Delete object activity",
+                    "Rollback object activity",
+                    "Change object activity",
+                    "Refresh object activity"
+                ],
+                correct: 1,
+                explanation: "The Rollback object activity is specifically designed to undo any changes made to an object since it was last committed to the database."
+            },
+            {
+                question: "In Mendix, what is the purpose of the User Story Acceptance Criteria?",
+                options: [
+                    "To define the budget for implementing the user story",
+                    "To list the technical specifications for the story",
+                    "To provide clear guidelines on when the story is considered finished",
+                    "To outline the design elements required for the story"
+                ],
+                correct: 2,
+                explanation: "This is the primary purpose of User Story Acceptance Criteria. They provide clear, measurable conditions that must be met for the story to be considered complete and acceptable."
+            },
+            {
+                question: "What Mendix widget should be used to display associated data in a Master-Detail scenario?",
+                options: [
                     "List View",
-                    "Reference Set Selector",
-                    "Template Grid"
+                    "Data Grid",
+                    "Template Grid",
+                    "Reference Selector"
                 ],
-                correctAnswer: 1,
-                feedback: "Correct: List View is ideal for displaying a dynamic list of objects, allowing for customization and flexibility in how the objects are presented."
-            },
-            {
-                question: "What is the name of the default User Interface framework provided by Mendix?",
-                options: [
-                    "Mendix UI Framework",
-                    "Atlas UI",
-                    "Responsive UI",
-                    "Mendix Interface Builder"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Atlas UI is the default framework, offering pre-defined components and styles for app development."
-            },
-            {
-                question: "In Mendix, what is the main reason for extending the Domain Model?",
-                options: [
-                    "To add new user interface components",
-                    "To integrate with external systems",
-                    "To introduce new entities and associations for data modeling",
-                    "To update the security settings of the app"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Extending the Domain Model is essential for accurately modeling the application's data structure."
-            },
-            {
-                question: "In a Mendix application, how are module roles typically associated for security purposes?",
-                options: [
-                    "Module roles are associated with user stories",
-                    "Module roles are associated with domain models",
-                    "Module roles are associated with user roles",
-                    "Module roles are associated with microflows"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Module roles are mapped to user roles to define permissions and access control."
-            },
-            {
-                question: "How can developers customize the look and feel of their Mendix applications?",
-                options: [
-                    "By using the Mendix Theme Customizer",
-                    "By editing the source code directly",
-                    "By downloading third-party UI kits",
-                    "By hiring a professional designer"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: The Theme Customizer allows easy customization without deep technical knowledge."
-            },
-            {
-                question: "When designing a Domain Model in Mendix, what is the effect of setting an association's delete behavior to 'Restrict'?",
-                options: [
-                    "It restricts the association to only certain types of entities",
-                    "It prevents the deletion of the associated objects",
-                    "It restricts the number of objects that can be associated",
-                    "It allows the deletion of the objects but maintains the association"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: 'Restrict' ensures objects cannot be deleted if referenced by others, maintaining data integrity."
-            },
-            {
-                question: "Which Mendix feature provides a visual representation of the app's domain model and its entities?",
-                options: [
-                    "Mendix Studio Pro",
-                    "Mendix Domain Editor",
-                    "Mendix Entity Designer",
-                    "Mendix Data Hub"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: Studio Pro provides a comprehensive visual representation of the domain model."
-            },
-            {
-                question: "What is the consequence of enabling 'Deep link module' in a Mendix application without proper security considerations?",
-                options: [
-                    "It may lead to improved application performance",
-                    "It could expose sensitive pages to unauthorized access",
-                    "It will disable all external links to the application",
-                    "It will require users to change their passwords regularly"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Deep links can bypass authentication if not secured."
-            },
-            {
-                question: "What is the limit on the number of incoming flows that can converge on a decision activity in a microflow?",
-                options: [
-                    "One",
-                    "Two",
-                    "There is no specific limit",
-                    "Four"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Mendix does not impose a limit on incoming flows for decision activities."
-            },
-            {
-                question: "At what point in the Agile process are user stories typically generated and compiled?",
-                options: [
-                    "During the Sprint Review",
-                    "At the beginning of the Sprint Planning",
-                    "After the Sprint Retrospective",
-                    "Throughout the Product Backlog Refinement"
-                ],
-                correctAnswer: 3,
-                feedback: "Correct: User stories are refined and compiled during backlog refinement."
-            },
-            {
-                question: "How would you represent a 'Customer' with multiple 'Orders', but each 'Order' belongs to only one 'Customer' in a Domain Model?",
-                options: [
-                    "Many-to-many association",
-                    "One-to-one association",
-                    "One-to-many association",
-                    "Transient object to hold the 'Orders' for each 'Customer'"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: A one-to-many association fits this scenario perfectly."
-            },
-            {
-                question: "What does it signify if a microflow parameter contains an object within the properties window of a button?",
-                options: [
-                    "The microflow can only be triggered by that specific object",
-                    "The object is passed as an argument to the microflow when the button is clicked",
-                    "The microflow will create a new instance of that object",
-                    "The microflow is restricted to actions related to the object's entity only"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: The object is passed to the microflow upon button click."
-            },
-            {
-                question: "How would you model the association between a 'Category' and a 'Product' where a Product belongs to one Category, but a Category includes multiple Products?",
-                options: [
-                    "Many-to-Many Association",
-                    "One-to-Many Association",
-                    "One-to-One Association",
-                    "Self-Association"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: This association type matches the requirement."
-            },
-            {
-                question: "What defines the connection between user roles and module roles in Mendix?",
-                options: [
-                    "User roles are subsets of module roles",
-                    "Module roles are mapped to user roles to grant specific rights",
-                    "User roles are automatically generated based on module roles",
-                    "Module roles and user roles are independently set"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Module roles are mapped to user roles for access control."
-            },
-            {
-                question: "Which technology prompts users with an 'Add to Home screen' option for launching a web app without downloading it?",
-                options: [
-                    "Responsive Web Design",
-                    "Progressive Web App (PWA)",
-                    "Native Mobile App",
-                    "Hybrid Mobile App"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: PWAs offer this feature for a native-like experience."
-            },
-            {
-                question: "What is the outcome when a microflow contains a loop activity that iterates over a list of objects?",
-                options: [
-                    "The microflow executes the loop body once for each object in the list",
-                    "The microflow selects a random object from the list and processes it",
-                    "The loop activity is ignored and the microflow continues without iteration",
-                    "The microflow pauses execution until manual intervention occurs"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: The loop activity iterates over each object, executing the loop body for each one."
-            },
-            {
-                question: "What is the philosophy behind Mendix's 'What You See Is What You Get' (WYSIWYG) approach?",
-                options: [
-                    "To allow developers to work with code-based templates",
-                    "To enable the creation of apps without any visual feedback",
-                    "To provide a real-time preview of the app as it's being built",
-                    "To require manual compilation before previewing changes"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: WYSIWYG lets developers see changes instantly, improving design accuracy."
-            },
-            {
-                question: "What is the purpose of 'Module Security' in Mendix?",
-                options: [
-                    "To define the navigation structure of the app",
-                    "To manage the database schema and indexes",
-                    "To configure permissions and access rights within a module",
-                    "To handle integration with external systems"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Module Security controls who can access what within a module."
-            },
-            {
-                question: "What is the purpose of a Sprint Goal in Scrum?",
-                options: [
-                    "To define detailed tasks for each team member",
-                    "To provide a clear, measurable objective for the Sprint",
-                    "To set financial targets for the development team",
-                    "To outline the technical architecture for the Sprint"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: The Sprint Goal aligns the team on a shared outcome."
-            },
-            {
-                question: "What does the 'delete behavior' in Mendix refer to?",
-                options: [
-                    "The way pages are removed from the app",
-                    "The method used to exclude microflows from a module",
-                    "The protocol for handling the deletion of associated objects in the domain model",
-                    "The style in which widgets are deleted from a page"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: It defines how deletions affect associated objects."
-            },
-            {
-                question: "After configuring page access to hide an overview page from certain user roles, what happens to the navigation menu item?",
-                options: [
-                    "The navigation menu item remains visible but is disabled",
-                    "The navigation menu item is automatically hidden from those user roles",
-                    "The navigation menu item redirects to an error page",
-                    "The navigation menu item must be manually removed by the developer"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Mendix hides navigation items for roles without access."
-            },
-            {
-                question: "What Mendix feature allows modeling a hierarchy within the same entity (e.g., organizational chart)?",
-                options: [
-                    "One-to-Many Association",
-                    "Many-to-Many Association",
-                    "Self-Association",
-                    "One-to-One Association"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Self-Association lets an entity reference itself for hierarchies."
-            },
-            {
-                question: "Which Scrum role is responsible for prioritizing the Product Backlog?",
-                options: [
-                    "The Scrum Master",
-                    "The Product Owner",
-                    "The Development Team",
-                    "The Stakeholder"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: The Product Owner manages and prioritizes the backlog."
-            },
-            {
-                question: "Following the 'Design' stage, what is the next phase in the Mendix Application Lifecycle?",
-                options: [
-                    "Prototyping",
-                    "Development",
-                    "User Acceptance Testing",
-                    "Deployment"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Development follows Design in the Mendix lifecycle."
-            },
-            {
-                question: "What is the role of an enumeration attribute in a Mendix Domain Model?",
-                options: [
-                    "To store a list of predefined constant values",
-                    "To define a numeric value that auto-increments",
-                    "To represent a binary true/false decision",
-                    "To store large amounts of text"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: Enumerations restrict attributes to fixed options like statuses or types."
-            },
-            {
-                question: "Which widget displays custom validation messages on a page?",
-                options: [
-                    "Data view",
-                    "Feedback widget",
-                    "Validation message widget",
-                    "Text box"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: This widget is designed for validation feedback."
-            },
-            {
-                question: "Which Agile framework is primarily adopted by Mendix?",
-                options: [
-                    "Extreme Programming (XP)",
-                    "Lean Software Development",
-                    "Scrum",
-                    "Kanban"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Mendix uses Scrum for iterative development."
-            },
-            {
-                question: "What is the benefit of 'calculated attributes' in a Domain Model?",
-                options: [
-                    "They ensure data consistency by calculating values based on other attributes",
-                    "They store user input without validation",
-                    "They encrypt sensitive data",
-                    "They generate unique identifiers"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: Calculated attributes auto-update based on logic."
-            },
-            {
-                question: "What is the main function of a decision activity in a microflow?",
-                options: [
-                    "To merge multiple flows into one",
-                    "To distribute database queries",
-                    "To evaluate a condition and determine the flow of logic",
-                    "To execute actions unconditionally"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Decision activities branch microflows based on conditions."
-            },
-            {
-                question: "What does the 'Aggregate list' activity do in a microflow?",
-                options: [
-                    "Combines multiple lists into one",
-                    "Performs calculations (sum, average, count) on a list of objects",
-                    "Filters a list based on a condition",
-                    "Sorts a list by an attribute"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Aggregates are used for calculations on lists."
-            },
-            {
-                question: "What should a Mendix page name reflect for maintainability?",
-                options: [
-                    "The developer who created it",
-                    "The primary purpose or function of the page",
-                    "The number of widgets on the page",
-                    "The last modification date"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Descriptive names improve clarity."
-            },
-            {
-                question: "When should you use a 'Before commit' event handler?",
-                options: [
-                    "Before a user logs in",
-                    "Prior to an object being saved to the database",
-                    "After a page loads",
-                    "Following a microflow execution"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: It triggers validations before saving."
-            },
-            {
-                question: "What is the result of a Sprint in Scrum?",
-                options: [
-                    "A completed user story",
-                    "A set of finished and tested features",
-                    "A fully deployed application",
-                    "A new marketplace version"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Sprints deliver incremental, shippable features."
-            },
-            {
-                question: "How does security differ between Production and Prototype environments?",
-                options: [
-                    "Production requires HTTPS, Prototype does not",
-                    "Production has stricter password policies",
-                    "All Prototype users are administrators",
-                    "No difference"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Production enforces higher security standards."
-            },
-            {
-                question: "How do you include an out-of-scope attribute in a microflow expression?",
-                options: [
-                    "Use a 'Retrieve' activity to bring it into scope",
-                    "Ignore the attribute",
-                    "Manually type the attribute name",
-                    "Restart the microflow"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: Retrieving ensures the attribute is accessible."
-            },
-            {
-                question: "Which component defines the visual layout of a Mendix app?",
-                options: [
-                    "Microflows",
-                    "Pages",
-                    "Entities",
-                    "Security"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Pages structure the UI and layout."
-            },
-            {
-                question: "What term describes a page layout that adjusts to screen sizes?",
-                options: [
-                    "Adaptive design",
-                    "Fluid layout",
-                    "Responsive design",
-                    "Elastic interface"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Responsive design adapts dynamically."
-            },
-            {
-                question: "How do you validate an email attribute's format in a Domain Model?",
-                options: [
-                    "Regular expressions",
-                    "Enumeration",
-                    "Exclusive split",
-                    "Calculated attribute"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: Regex enforces email format rules."
-            },
-            {
-                question: "Which attribute property ensures uniqueness across entity instances?",
-                options: [
-                    "Default value",
-                    "AutoNumber",
-                    "Unique",
-                    "Indexed"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: The 'Unique' property enforces value uniqueness."
-            },
-            {
-                question: "What is the focus of the Daily Stand-up in Scrum?",
-                options: [
-                    "Discuss new stakeholder requests",
-                    "Critique the previous day's work",
-                    "Provide status updates and identify blockers",
-                    "Plan tasks for the next Sprint"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Stand-ups sync the team on progress."
-            },
-            {
-                question: "What is the primary use of a 'Container' widget?",
-                options: [
-                    "Store files/images",
-                    "Execute server-side logic",
-                    "Group widgets and control layout",
-                    "Serve as a navigation bar"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Containers organize UI elements."
-            },
-            {
-                question: "What happens when a 'Break' event is encountered in a loop?",
-                options: [
-                    "The microflow stops entirely",
-                    "The loop terminates, and the microflow continues after it",
-                    "The loop skips to the next iteration",
-                    "The event is ignored"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: 'Break' exits the loop only."
-            },
-            {
-                question: "Which resource helps Mendix users collaborate on problem-solving?",
-                options: [
-                    "Mendix Tech Blogs",
-                    "Mendix Community Forum",
-                    "Online Documentation",
-                    "Support Chat"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: The Forum enables knowledge sharing."
-            },
-            {
-                question: "How do you handle a microflow decision based on file upload ($FileDocument/Size > 0)?",
-                options: [
-                    "Halt until a file is uploaded",
-                    "Branch based on the file's presence/absence",
-                    "Upload a default file",
-                    "Ignore file size"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Conditional branching handles both cases."
-            },
-            {
-                question: "How do you model a 'Patient' with multiple 'Doctors', and each 'Doctor' has multiple 'Patients'?",
-                options: [
-                    "One-to-One",
-                    "One-to-Many",
-                    "Many-to-Many",
-                    "Self-Association"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Many-to-Many fits bidirectional relationships."
-            },
-            {
-                question: "What is the main use of a 'Container' widget?",
-                options: [
-                    "Execute microflows",
-                    "Store temporary data",
-                    "Group widgets and control layout",
-                    "Act as a placeholder"
-                ],
-                correctAnswer: 2,
-                feedback: "Correct: Containers structure page layouts."
-            },
-            {
-                question: "How do you increment an attribute by 1 in a microflow?",
-                options: [
-                    "Loop with a counter",
-                    "'Change Object' with an addition expression",
-                    "Create a new object",
-                    "Subtract a negative value"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: This is the most efficient method."
-            },
-            {
-                question: "What is the upper limit of outgoing flows for a merge element?",
-                options: [
-                    "One",
-                    "Two",
-                    "Unlimited",
-                    "Five"
-                ],
-                correctAnswer: 0,
-                feedback: "Correct: Merges consolidate flows into a single path."
-            },
-            {
-                question: "What does an 'Exclusive merge' activity do?",
-                options: [
-                    "Creates a new path",
-                    "Combines splits into a single path",
-                    "Executes an operation on an object",
-                    "Merges database records"
-                ],
-                correctAnswer: 1,
-                feedback: "Correct: Merges unify branched flows."
-            },
-            {
-                question: "Which microflow activity validates data before committing to the database?",
-                options: [
-                    "Retrieve",
-                    "Change",
-                    "Aggregate",
-                    "Validation feedback"
-                ],
-                correctAnswer: 3,
-                feedback: "Correct: This activity enforces data validation rules before saving to the database."
+                correct: 0,
+                explanation: "List View is ideal for displaying a list of items from which a user can select, triggering the display of associated details in another part of the page."
             }
         ];
-        // Shuffle questions for randomness
-        questions.sort(() => Math.random() - 0.5);
-        // Initialize quiz
-        document.addEventListener('DOMContentLoaded', () => {
-            startTimer();
-            loadQuestion();
-        });
-        
 
-
-        // State variables
-        let currentQuestion = 0;
-        let selectedOption = null;
-        let userAnswers = new Array(questions.length).fill(null);
-        let score = 0;
-        let correctAnswers = 0;
-        let quizSubmitted = false;
-        let startTime, endTime;
-        let timerInterval;
-
-        // DOM elements
-        const questionElement = document.getElementById('question');
-        const questionNumberElement = document.getElementById('question-number');
-        const optionsElement = document.getElementById('options');
-        const feedbackElement = document.getElementById('feedback');
-        const questionCounterElement = document.getElementById('question-counter');
-        const progressFillElement = document.getElementById('progress-fill');
-        const scoreDisplayElement = document.getElementById('score-display');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const submitBtn = document.getElementById('submit-btn');
-        const quizContainer = document.getElementById('quiz-container');
-        const resultsContainer = document.getElementById('results');
-        const scoreElement = document.getElementById('score');
-        const timeSummaryElement = document.getElementById('time-summary');
-        const detailedResultsElement = document.getElementById('detailed-results');
-        const restartBtn = document.getElementById('restart-btn');
-        const timerElement = document.getElementById('timer');
-
-        // Start timer
-        function startTimer() {
-            startTime = new Date();
-            timerInterval = setInterval(updateTimer, 1000);
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
         }
 
-        // Update timer
+        // Initialize all 50 questions (repeating the 5 base questions)
+        function initializeQuestions() {
+            const allQuestions = [];
+            for (let i = 0; i < 10; i++) {
+                allQuestions.push(...questions);
+            }
+            return shuffleArray(allQuestions).slice(0, 50);
+        }
+
+        // Game state
+        let gameState = {
+            questions: [],
+            currentQuestionIndex: 0,
+            score: 0,
+            answers: [],
+            startTime: null,
+            timer: null,
+            timeElapsed: 0
+        };
+
+        // Timer functions
+        function startTimer() {
+            gameState.startTime = Date.now();
+            gameState.timer = setInterval(updateTimer, 1000);
+        }
+
         function updateTimer() {
-            const currentTime = new Date();
-            const elapsedTime = new Date(currentTime - startTime);
-            const hours = String(elapsedTime.getUTCHours()).padStart(2, '0');
-            const minutes = String(elapsedTime.getUTCMinutes()).padStart(2, '0');
-            const seconds = String(elapsedTime.getUTCSeconds()).padStart(2, '0');
-            
-            timerElement.textContent = `${hours}:${minutes}:${seconds}`;
-            
-            // Add warning after 30 minutes
-            if (elapsedTime.getUTCMinutes() >= 30) {
-                timerElement.classList.add('time-warning');
+            gameState.timeElapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(gameState.timeElapsed / 60);
+            const seconds = gameState.timeElapsed % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function stopTimer() {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
             }
         }
 
-        // Stop timer
-        function stopTimer() {
-            clearInterval(timerInterval);
-            endTime = new Date();
-        }
-
-        // Format time
-        function formatTime(ms) {
-            const date = new Date(ms);
-            const hours = String(date.getUTCHours()).padStart(2, '0');
-            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-            const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
-        }
-
-        // Load question
-        function loadQuestion() {
-            const question = questions[currentQuestion];
-            questionNumberElement.textContent = `Question ${currentQuestion + 1}`;
-            questionElement.textContent = question.question;
+        // Start exam
+        function startExam() {
+            gameState.questions = initializeQuestions();
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.answers = [];
             
-            optionsElement.innerHTML = '';
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'block';
+            document.getElementById('resultsScreen').style.display = 'none';
+            
+            startTimer();
+            displayQuestion();
+        }
+
+        // Display current question
+        function displayQuestion() {
+            const question = gameState.questions[gameState.currentQuestionIndex];
+            const questionNumber = gameState.currentQuestionIndex + 1;
+            
+            // Update header info
+            document.getElementById('currentQuestion').textContent = questionNumber;
+            document.getElementById('questionNumber').textContent = `Question ${questionNumber} of 50`;
+            document.getElementById('progressFill').style.width = `${(questionNumber / 50) * 100}%`;
+            
+            // Update question
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Create options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
             question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.classList.add('option');
-                if (userAnswers[currentQuestion] === index) {
-                    optionElement.classList.add('selected');
-                    selectedOption = index;
-                }
-                optionElement.textContent = option;
-                optionElement.addEventListener('click', () => selectOption(index));
-                optionsElement.appendChild(optionElement);
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.onclick = () => selectOption(index);
+                
+                const letter = String.fromCharCode(65 + index); // A, B, C, D
+                optionDiv.innerHTML = `
+                    <span class="option-letter">${letter}</span>
+                    <span class="option-text">${option}</span>
+                `;
+                
+                optionsContainer.appendChild(optionDiv);
             });
             
-            feedbackElement.textContent = '';
-            feedbackElement.className = 'feedback';
-            feedbackElement.style.display = 'none';
+            // Hide feedback and reset controls
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('prevBtn').disabled = gameState.currentQuestionIndex === 0;
             
-            questionCounterElement.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
-            progressFillElement.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
-            
-            prevBtn.disabled = currentQuestion === 0;
-            nextBtn.style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
-            submitBtn.style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
-
-            if (quizSubmitted) {
-                showFeedback();
-            }
+            // Update next button text
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.textContent = gameState.currentQuestionIndex === 49 ? 'Finish Exam' : 'Next Question';
         }
 
         // Select option
-        function selectOption(index) {
-            if (quizSubmitted) return;
-            
+        function selectOption(selectedIndex) {
+            const question = gameState.questions[gameState.currentQuestionIndex];
             const options = document.querySelectorAll('.option');
-            options.forEach(option => option.classList.remove('selected', 'correct', 'incorrect'));
             
-            options[index].classList.add('selected');
-            selectedOption = index;
-            userAnswers[currentQuestion] = index;
+            // Remove previous selections
+            options.forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
             
-            // Evaluate answer immediately
-            evaluateAnswer();
-        }
-
-        // Evaluate answer
-        function evaluateAnswer() {
-            const question = questions[currentQuestion];
-            const options = document.querySelectorAll('.option');
-            const userAnswer = userAnswers[currentQuestion];
+            // Mark selected option
+            options[selectedIndex].classList.add('selected');
             
-            // Mark correct answer
-            options[question.correctAnswer].classList.add('correct');
-            
-            // If user selected an answer
-            if (userAnswer !== null) {
-                if (userAnswer === question.correctAnswer) {
-                    options[userAnswer].classList.add('correct');
-                    feedbackElement.textContent = `✅ Correct! ${question.feedback}`;
-                    feedbackElement.classList.add('correct-feedback');
-                } else {
-                    options[userAnswer].classList.add('incorrect');
-                    feedbackElement.textContent = `❌ Incorrect. ${question.feedback}`;
-                    feedbackElement.classList.add('incorrect-feedback');
-                }
-                feedbackElement.style.display = 'block';
+            // Show correct answer and feedback
+            setTimeout(() => {
+                const isCorrect = selectedIndex === question.correct;
                 
-                // Update score display
-                updateScoreDisplay();
-            }
-        }
-
-        // Update score display
-        function updateScoreDisplay() {
-            correctAnswers = 0;
-            questions.forEach((question, index) => {
-                if (userAnswers[index] === question.correctAnswer) {
-                    correctAnswers++;
+                // Mark correct answer
+                options[question.correct].classList.add('correct');
+                
+                // Mark incorrect if wrong answer was selected
+                if (!isCorrect) {
+                    options[selectedIndex].classList.add('incorrect');
                 }
-            });
-            
-            const percentage = Math.round((correctAnswers / questions.length) * 100);
-            scoreDisplayElement.textContent = `Score: ${percentage}%`;
+                
+                // Update score
+                if (isCorrect) {
+                    gameState.score++;
+                    document.getElementById('correctAnswers').textContent = gameState.score;
+                }
+                
+                // Store answer
+                gameState.answers[gameState.currentQuestionIndex] = {
+                    selected: selectedIndex,
+                    correct: question.correct,
+                    isCorrect: isCorrect
+                };
+                
+                // Show feedback
+                showFeedback(isCorrect, question.explanation);
+                
+                // Enable next button
+                document.getElementById('nextBtn').disabled = false;
+            }, 500);
         }
 
-        // Navigation
-        nextBtn.addEventListener('click', () => {
-            if (currentQuestion < questions.length - 1) {
-                currentQuestion++;
-                selectedOption = userAnswers[currentQuestion];
-                loadQuestion();
-            }
-        });
+        // Show feedback
+        function showFeedback(isCorrect, explanation) {
+            const feedback = document.getElementById('feedback');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackText = document.getElementById('feedbackText');
+            
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedbackTitle.innerHTML = isCorrect 
+                ? '<span class="feedback-icon">✅</span>Correct!' 
+                : '<span class="feedback-icon">❌</span>Incorrect';
+            feedbackText.textContent = explanation;
+            
+            feedback.style.display = 'block';
+        }
 
-        prevBtn.addEventListener('click', () => {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                selectedOption = userAnswers[currentQuestion];
-                loadQuestion();
+        // Navigation functions
+        function nextQuestion() {
+            if (gameState.currentQuestionIndex < 49) {
+                gameState.currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                finishExam();
             }
-        });
+        }
 
-        // Submit exam
-        submitBtn.addEventListener('click', () => {
-            quizSubmitted = true;
+        function previousQuestion() {
+            if (gameState.currentQuestionIndex > 0) {
+                gameState.currentQuestionIndex--;
+                displayQuestion();
+                
+                // If this question was already answered, show the previous answer
+                const previousAnswer = gameState.answers[gameState.currentQuestionIndex];
+                if (previousAnswer) {
+                    const options = document.querySelectorAll('.option');
+                    options[previousAnswer.selected].classList.add('selected');
+                    
+                    setTimeout(() => {
+                        options[previousAnswer.correct].classList.add('correct');
+                        if (!previousAnswer.isCorrect) {
+                            options[previousAnswer.selected].classList.add('incorrect');
+                        }
+                        
+                        const question = gameState.questions[gameState.currentQuestionIndex];
+                        showFeedback(previousAnswer.isCorrect, question.explanation);
+                        document.getElementById('nextBtn').disabled = false;
+                    }, 100);
+                }
+            }
+        }
+
+        // Finish exam
+        function finishExam() {
             stopTimer();
-            calculateScore();
-            quizContainer.style.display = 'none';
-            resultsContainer.style.display = 'block';
-        });
-
-        // Calculate score
-        function calculateScore() {
-            score = 0;
-            let resultsHTML = '<h3>Detailed Results:</h3><ol>';
             
-            questions.forEach((question, index) => {
-                if (userAnswers[index] === question.correctAnswer) {
-                    score++;
-                    resultsHTML += `
-                        <li class="correct">
-                            <strong>Question ${index + 1}:</strong> Correct
-                            <div class="explanation">${question.feedback}</div>
-                        </li>`;
-                } else {
-                    const userAnswerText = userAnswers[index] !== null ? 
-                        `Your answer: <span class="incorrect-answer">${question.options[userAnswers[index]]}</span>` : 
-                        "No answer provided";
-                    resultsHTML += `
-                        <li class="incorrect">
-                            <strong>Question ${index + 1}:</strong> Incorrect<br>
-                            ${userAnswerText}<br>
-                            Correct answer: <span class="correct-answer">${question.options[question.correctAnswer]}</span><br>
-                            <div class="explanation">${question.feedback}</div>
-                        </li>`;
-                }
-            });
+            document.getElementById('questionContainer').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
             
-            resultsHTML += '</ol>';
+            // Calculate results
+            const percentage = Math.round((gameState.score / 50) * 100);
+            const minutes = Math.floor(gameState.timeElapsed / 60);
+            const seconds = gameState.timeElapsed % 60;
+            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            const percentage = Math.round((score / questions.length) * 100);
-            const timeTaken = endTime - startTime;
+            // Update results display
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            document.getElementById('resultCorrect').textContent = gameState.score;
+            document.getElementById('resultAccuracy').textContent = `${percentage}%`;
+            document.getElementById('resultTime').textContent = timeString;
             
-            scoreElement.textContent = `Final Score: ${score} out of ${questions.length} (${percentage}%)`;
-            timeSummaryElement.textContent = `Time taken: ${formatTime(timeTaken)}`;
-            detailedResultsElement.innerHTML = resultsHTML;
+            // Set score circle class and message
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreMessage = document.getElementById('scoreMessage');
+            
+            if (percentage >= 80) {
+                scoreCircle.className = 'score-circle excellent';
+                scoreMessage.textContent = 'Excellent work! You have a strong understanding of Mendix concepts.';
+            } else if (percentage >= 70) {
+                scoreCircle.className = 'score-circle good';
+                scoreMessage.textContent = 'Good job! You have a solid foundation. Review the areas you missed.';
+            } else {
+                scoreCircle.className = 'score-circle needs-improvement';
+                scoreMessage.textContent = 'Keep studying! Focus on the areas where you struggled and try again.';
+            }
         }
 
         // Restart exam
-        restartBtn.addEventListener('click', () => {
-            currentQuestion = 0;
-            selectedOption = null;
-            userAnswers = new Array(questions.length).fill(null);
-            score = 0;
-            correctAnswers = 0;
-            quizSubmitted = false;
-            timerElement.classList.remove('time-warning');
+        function restartExam() {
+            // Reset game state
+            gameState = {
+                questions: [],
+                currentQuestionIndex: 0,
+                score: 0,
+                answers: [],
+                startTime: null,
+                timer: null,
+                timeElapsed: 0
+            };
             
-            quizContainer.style.display = 'block';
-            resultsContainer.style.display = 'none';
-            scoreDisplayElement.textContent = "Score: 0%";
+            // Reset UI
+            document.getElementById('currentQuestion').textContent = '0';
+            document.getElementById('correctAnswers').textContent = '0';
+            document.getElementById('timer').textContent = '00:00';
             
-            // Reset and restart timer
-            clearInterval(timerInterval);
-            startTimer();
-            loadQuestion();
-        });
+            // Show welcome screen
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'block';
+        }
 
-        // Initialize
-        startTimer();
-        loadQuestion();
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial state
+            document.getElementById('welcomeScreen').style.display = 'block';
+            document.getElementById('questionContainer').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'none';
+        });
     </script>
 </body>
 </html>
