@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mendix Certification Exam Simulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #003366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .timer-container {
+            background-color: #f0f8ff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .question-container {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .options {
+            margin-left: 10px;
+        }
+        .option {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .option:hover {
+            background-color: #e6f2ff;
+        }
+        .option.selected {
+            background-color: #cce5ff;
+            border-left: 4px solid #0066cc;
+        }
+        .option.correct {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .correct-feedback {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .incorrect-feedback {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .score-display {
+            font-weight: bold;
+            color: #0066cc;
+            min-width: 80px;
+            text-align: right;
+        }
+        .results {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #0066cc;
+        }
+        .time-summary {
+            font-size: 18px;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        .restart-btn {
+            margin-top: 20px;
+        }
+        .question-number {
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .correct-answer {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .time-warning {
+            color: #dc3545;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mendix Certification Exam Simulator</h1>
+        
+        <div class="header-info">
+            <div class="timer-container">
+                Time: <span id="timer">00:00:00</span>
+            </div>
+            <div class="score-display" id="score-display">Score: 0%</div>
+        </div>
+        
+        <div id="quiz-container">
+            <div class="progress-container">
+                <div id="question-counter">Question 1 of 50</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div id="question-container" class="question-container active">
+                <div class="question-number" id="question-number">Question 1</div>
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+            
+            <div class="navigation">
+                <button id="prev-btn" disabled>Previous</button>
+                <button id="next-btn">Next</button>
+                <button id="submit-btn" style="display: none;">Submit Exam</button>
+            </div>
+        </div>
+        
+        <div id="results" class="results">
+            <h2>Exam Results</h2>
+            <div class="score" id="score"></div>
+            <div class="time-summary" id="time-summary"></div>
+            <div id="detailed-results"></div>
+            <button class="restart-btn" id="restart-btn">Restart Exam</button>
+        </div>
+    </div>
+
+    <script>
+        // Questions and answers
+        const questions = [
+            {
+                question: "Which widget in Mendix is most suitable for creating a dynamic list of objects that are associated with a specific object through a One-to-Many Association?",
+                options: [
+                    "Data Grid",
+                    "List View",
+                    "Reference Set Selector",
+                    "Template Grid"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: List View is ideal for displaying a dynamic list of objects, allowing for customization and flexibility in how the objects are presented."
+            },
+            {
+                question: "What is the name of the default User Interface framework provided by Mendix?",
+                options: [
+                    "Mendix UI Framework",
+                    "Atlas UI",
+                    "Responsive UI",
+                    "Mendix Interface Builder"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Atlas UI is the default framework, offering pre-defined components and styles for app development."
+            },
+            // ... (Todas las 50 preguntas aquí en el mismo formato)
+            {
+                question: "Which microflow activity validates data before committing to the database?",
+                options: [
+                    "Retrieve",
+                    "Change",
+                    "Aggregate",
+                    "Validation feedback"
+                ],
+                correctAnswer: 3,
+                feedback: "Correct: This activity enforces data validation rules before saving to the database."
+            }
+        ];
+
+        // State variables
+        let currentQuestion = 0;
+        let selectedOption = null;
+        let userAnswers = new Array(questions.length).fill(null);
+        let score = 0;
+        let correctAnswers = 0;
+        let quizSubmitted = false;
+        let startTime, endTime;
+        let timerInterval;
+
+        // DOM elements
+        const questionElement = document.getElementById('question');
+        const questionNumberElement = document.getElementById('question-number');
+        const optionsElement = document.getElementById('options');
+        const feedbackElement = document.getElementById('feedback');
+        const questionCounterElement = document.getElementById('question-counter');
+        const progressFillElement = document.getElementById('progress-fill');
+        const scoreDisplayElement = document.getElementById('score-display');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results');
+        const scoreElement = document.getElementById('score');
+        const timeSummaryElement = document.getElementById('time-summary');
+        const detailedResultsElement = document.getElementById('detailed-results');
+        const restartBtn = document.getElementById('restart-btn');
+        const timerElement = document.getElementById('timer');
+
+        // Start timer
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Update timer
+        function updateTimer() {
+            const currentTime = new Date();
+            const elapsedTime = new Date(currentTime - startTime);
+            const hours = String(elapsedTime.getUTCHours()).padStart(2, '0');
+            const minutes = String(elapsedTime.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(elapsedTime.getUTCSeconds()).padStart(2, '0');
+            
+            timerElement.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            // Add warning after 30 minutes
+            if (elapsedTime.getUTCMinutes() >= 30) {
+                timerElement.classList.add('time-warning');
+            }
+        }
+
+        // Stop timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+            endTime = new Date();
+        }
+
+        // Format time
+        function formatTime(ms) {
+            const date = new Date(ms);
+            const hours = String(date.getUTCHours()).padStart(2, '0');
+            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Load question
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            questionNumberElement.textContent = `Question ${currentQuestion + 1}`;
+            questionElement.textContent = question.question;
+            
+            optionsElement.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                if (userAnswers[currentQuestion] === index) {
+                    optionElement.classList.add('selected');
+                    selectedOption = index;
+                }
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsElement.appendChild(optionElement);
+            });
+            
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            feedbackElement.style.display = 'none';
+            
+            questionCounterElement.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            progressFillElement.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+            
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            submitBtn.style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+
+            if (quizSubmitted) {
+                showFeedback();
+            }
+        }
+
+        // Select option
+        function selectOption(index) {
+            if (quizSubmitted) return;
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected', 'correct', 'incorrect'));
+            
+            options[index].classList.add('selected');
+            selectedOption = index;
+            userAnswers[currentQuestion] = index;
+            
+            // Evaluate answer immediately
+            evaluateAnswer();
+        }
+
+        // Evaluate answer
+        function evaluateAnswer() {
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const userAnswer = userAnswers[currentQuestion];
+            
+            // Mark correct answer
+            options[question.correctAnswer].classList.add('correct');
+            
+            // If user selected an answer
+            if (userAnswer !== null) {
+                if (userAnswer === question.correctAnswer) {
+                    options[userAnswer].classList.add('correct');
+                    feedbackElement.textContent = `✅ Correct! ${question.feedback}`;
+                    feedbackElement.classList.add('correct-feedback');
+                } else {
+                    options[userAnswer].classList.add('incorrect');
+                    feedbackElement.textContent = `❌ Incorrect. ${question.feedback}`;
+                    feedbackElement.classList.add('incorrect-feedback');
+                }
+                feedbackElement.style.display = 'block';
+                
+                // Update score display
+                updateScoreDisplay();
+            }
+        }
+
+        // Update score display
+        function updateScoreDisplay() {
+            correctAnswers = 0;
+            questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    correctAnswers++;
+                }
+            });
+            
+            const percentage = Math.round((correctAnswers / questions.length) * 100);
+            scoreDisplayElement.textContent = `Score: ${percentage}%`;
+        }
+
+        // Navigation
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                selectedOption = userAnswers[currentQuestion];
+                loadQuestion();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = userAnswers[currentQuestion];
+                loadQuestion();
+            }
+        });
+
+        // Submit exam
+        submitBtn.addEventListener('click', () => {
+            quizSubmitted = true;
+            stopTimer();
+            calculateScore();
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+        });
+
+        // Calculate score
+        function calculateScore() {
+            score = 0;
+            let resultsHTML = '<h3>Detailed Results:</h3><ol>';
+            
+            questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    score++;
+                    resultsHTML += `
+                        <li class="correct">
+                            <strong>Question ${index + 1}:</strong> Correct
+                            <div class="explanation">${question.feedback}</div>
+                        </li>`;
+                } else {
+                    const userAnswerText = userAnswers[index] !== null ? 
+                        `Your answer: <span class="incorrect-answer">${question.options[userAnswers[index]]}</span>` : 
+                        "No answer provided";
+                    resultsHTML += `
+                        <li class="incorrect">
+                            <strong>Question ${index + 1}:</strong> Incorrect<br>
+                            ${userAnswerText}<br>
+                            Correct answer: <span class="correct-answer">${question.options[question.correctAnswer]}</span><br>
+                            <div class="explanation">${question.feedback}</div>
+                        </li>`;
+                }
+            });
+            
+            resultsHTML += '</ol>';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const timeTaken = endTime - startTime;
+            
+            scoreElement.textContent = `Final Score: ${score} out of ${questions.length} (${percentage}%)`;
+            timeSummaryElement.textContent = `Time taken: ${formatTime(timeTaken)}`;
+            detailedResultsElement.innerHTML = resultsHTML;
+        }
+
+        // Restart exam
+        restartBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            selectedOption = null;
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            correctAnswers = 0;
+            quizSubmitted = false;
+            timerElement.classList.remove('time-warning');
+            
+            quizContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            scoreDisplayElement.textContent = "Score: 0%";
+            
+            // Reset and restart timer
+            clearInterval(timerInterval);
+            startTimer();
+            loadQuestion();
+        });
+
+        // Initialize
+        startTimer();
+        loadQuestion();
+    </script>
+</body>
+</html>

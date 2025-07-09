@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mendix Certification Exam Simulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #003366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .timer-container {
+            background-color: #f0f8ff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .question-container {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .options {
+            margin-left: 10px;
+        }
+        .option {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .option:hover {
+            background-color: #e6f2ff;
+        }
+        .option.selected {
+            background-color: #cce5ff;
+            border-left: 4px solid #0066cc;
+        }
+        .option.correct {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .correct-feedback {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .incorrect-feedback {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .score-display {
+            font-weight: bold;
+            color: #0066cc;
+            min-width: 80px;
+            text-align: right;
+        }
+        .results {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #0066cc;
+        }
+        .time-summary {
+            font-size: 18px;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        .restart-btn {
+            margin-top: 20px;
+        }
+        .question-number {
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .correct-answer {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .time-warning {
+            color: #dc3545;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mendix Certification Exam Simulator</h1>
+        
+        <div class="header-info">
+            <div class="timer-container">
+                Time: <span id="timer">00:00:00</span>
+            </div>
+            <div class="score-display" id="score-display">Score: 0%</div>
+        </div>
+        
+        <div id="quiz-container">
+            <div class="progress-container">
+                <div id="question-counter">Question 1 of 50</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div id="question-container" class="question-container active">
+                <div class="question-number" id="question-number">Question 1</div>
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+            
+            <div class="navigation">
+                <button id="prev-btn" disabled>Previous</button>
+                <button id="next-btn">Next</button>
+                <button id="submit-btn" style="display: none;">Submit Exam</button>
+            </div>
+        </div>
+        
+        <div id="results" class="results">
+            <h2>Exam Results</h2>
+            <div class="score" id="score"></div>
+            <div class="time-summary" id="time-summary"></div>
+            <div id="detailed-results"></div>
+            <button class="restart-btn" id="restart-btn">Restart Exam</button>
+        </div>
+    </div>
+
+    <script>
+        // Questions and answers
+               // Questions and answers
+        const questions = [
+            {
+                question: "Which widget in Mendix is most suitable for creating a dynamic list of objects that are associated with a specific object through a One-to-Many Association?",
+                options: [
+                    "Data Grid",
+                    "List View",
+                    "Reference Set Selector",
+                    "Template Grid"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: List View is ideal for displaying a dynamic list of objects, allowing for customization and flexibility in how the objects are presented."
+            },
+            {
+                question: "What is the name of the default User Interface framework provided by Mendix?",
+                options: [
+                    "Mendix UI Framework",
+                    "Atlas UI",
+                    "Responsive UI",
+                    "Mendix Interface Builder"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Atlas UI is the default framework, offering pre-defined components and styles for app development."
+            },
+            {
+                question: "In Mendix, what is the main reason for extending the Domain Model?",
+                options: [
+                    "To add new user interface components",
+                    "To integrate with external systems",
+                    "To introduce new entities and associations for data modeling",
+                    "To update the security settings of the app"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Extending the Domain Model is essential for accurately modeling the application's data structure."
+            },
+            {
+                question: "In a Mendix application, how are module roles typically associated for security purposes?",
+                options: [
+                    "Module roles are associated with user stories",
+                    "Module roles are associated with domain models",
+                    "Module roles are associated with user roles",
+                    "Module roles are associated with microflows"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Module roles are mapped to user roles to define permissions and access control."
+            },
+            {
+                question: "How can developers customize the look and feel of their Mendix applications?",
+                options: [
+                    "By using the Mendix Theme Customizer",
+                    "By editing the source code directly",
+                    "By downloading third-party UI kits",
+                    "By hiring a professional designer"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: The Theme Customizer allows easy customization without deep technical knowledge."
+            },
+            {
+                question: "When designing a Domain Model in Mendix, what is the effect of setting an association's delete behavior to 'Restrict'?",
+                options: [
+                    "It restricts the association to only certain types of entities",
+                    "It prevents the deletion of the associated objects",
+                    "It restricts the number of objects that can be associated",
+                    "It allows the deletion of the objects but maintains the association"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: 'Restrict' ensures objects cannot be deleted if referenced by others, maintaining data integrity."
+            },
+            {
+                question: "Which Mendix feature provides a visual representation of the app's domain model and its entities?",
+                options: [
+                    "Mendix Studio Pro",
+                    "Mendix Domain Editor",
+                    "Mendix Entity Designer",
+                    "Mendix Data Hub"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: Studio Pro provides a comprehensive visual representation of the domain model."
+            },
+            {
+                question: "What is the consequence of enabling 'Deep link module' in a Mendix application without proper security considerations?",
+                options: [
+                    "It may lead to improved application performance",
+                    "It could expose sensitive pages to unauthorized access",
+                    "It will disable all external links to the application",
+                    "It will require users to change their passwords regularly"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Deep links can bypass authentication if not secured."
+            },
+            {
+                question: "What is the limit on the number of incoming flows that can converge on a decision activity in a microflow?",
+                options: [
+                    "One",
+                    "Two",
+                    "There is no specific limit",
+                    "Four"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Mendix does not impose a limit on incoming flows for decision activities."
+            },
+            {
+                question: "At what point in the Agile process are user stories typically generated and compiled?",
+                options: [
+                    "During the Sprint Review",
+                    "At the beginning of the Sprint Planning",
+                    "After the Sprint Retrospective",
+                    "Throughout the Product Backlog Refinement"
+                ],
+                correctAnswer: 3,
+                feedback: "Correct: User stories are refined and compiled during backlog refinement."
+            },
+            {
+                question: "How would you represent a 'Customer' with multiple 'Orders', but each 'Order' belongs to only one 'Customer' in a Domain Model?",
+                options: [
+                    "Many-to-many association",
+                    "One-to-one association",
+                    "One-to-many association",
+                    "Transient object to hold the 'Orders' for each 'Customer'"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: A one-to-many association fits this scenario perfectly."
+            },
+            {
+                question: "What does it signify if a microflow parameter contains an object within the properties window of a button?",
+                options: [
+                    "The microflow can only be triggered by that specific object",
+                    "The object is passed as an argument to the microflow when the button is clicked",
+                    "The microflow will create a new instance of that object",
+                    "The microflow is restricted to actions related to the object's entity only"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: The object is passed to the microflow upon button click."
+            },
+            {
+                question: "How would you model the association between a 'Category' and a 'Product' where a Product belongs to one Category, but a Category includes multiple Products?",
+                options: [
+                    "Many-to-Many Association",
+                    "One-to-Many Association",
+                    "One-to-One Association",
+                    "Self-Association"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: This association type matches the requirement."
+            },
+            {
+                question: "What defines the connection between user roles and module roles in Mendix?",
+                options: [
+                    "User roles are subsets of module roles",
+                    "Module roles are mapped to user roles to grant specific rights",
+                    "User roles are automatically generated based on module roles",
+                    "Module roles and user roles are independently set"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Module roles are mapped to user roles for access control."
+            },
+            {
+                question: "Which technology prompts users with an 'Add to Home screen' option for launching a web app without downloading it?",
+                options: [
+                    "Responsive Web Design",
+                    "Progressive Web App (PWA)",
+                    "Native Mobile App",
+                    "Hybrid Mobile App"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: PWAs offer this feature for a native-like experience."
+            },
+            {
+                question: "What is the outcome when a microflow contains a loop activity that iterates over a list of objects?",
+                options: [
+                    "The microflow executes the loop body once for each object in the list",
+                    "The microflow selects a random object from the list and processes it",
+                    "The loop activity is ignored and the microflow continues without iteration",
+                    "The microflow pauses execution until manual intervention occurs"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: The loop activity iterates over each object, executing the loop body for each one."
+            },
+            {
+                question: "What is the philosophy behind Mendix's 'What You See Is What You Get' (WYSIWYG) approach?",
+                options: [
+                    "To allow developers to work with code-based templates",
+                    "To enable the creation of apps without any visual feedback",
+                    "To provide a real-time preview of the app as it's being built",
+                    "To require manual compilation before previewing changes"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: WYSIWYG lets developers see changes instantly, improving design accuracy."
+            },
+            {
+                question: "What is the purpose of 'Module Security' in Mendix?",
+                options: [
+                    "To define the navigation structure of the app",
+                    "To manage the database schema and indexes",
+                    "To configure permissions and access rights within a module",
+                    "To handle integration with external systems"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Module Security controls who can access what within a module."
+            },
+            {
+                question: "What is the purpose of a Sprint Goal in Scrum?",
+                options: [
+                    "To define detailed tasks for each team member",
+                    "To provide a clear, measurable objective for the Sprint",
+                    "To set financial targets for the development team",
+                    "To outline the technical architecture for the Sprint"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: The Sprint Goal aligns the team on a shared outcome."
+            },
+            {
+                question: "What does the 'delete behavior' in Mendix refer to?",
+                options: [
+                    "The way pages are removed from the app",
+                    "The method used to exclude microflows from a module",
+                    "The protocol for handling the deletion of associated objects in the domain model",
+                    "The style in which widgets are deleted from a page"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: It defines how deletions affect associated objects."
+            },
+            {
+                question: "After configuring page access to hide an overview page from certain user roles, what happens to the navigation menu item?",
+                options: [
+                    "The navigation menu item remains visible but is disabled",
+                    "The navigation menu item is automatically hidden from those user roles",
+                    "The navigation menu item redirects to an error page",
+                    "The navigation menu item must be manually removed by the developer"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Mendix hides navigation items for roles without access."
+            },
+            {
+                question: "What Mendix feature allows modeling a hierarchy within the same entity (e.g., organizational chart)?",
+                options: [
+                    "One-to-Many Association",
+                    "Many-to-Many Association",
+                    "Self-Association",
+                    "One-to-One Association"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Self-Association lets an entity reference itself for hierarchies."
+            },
+            {
+                question: "Which Scrum role is responsible for prioritizing the Product Backlog?",
+                options: [
+                    "The Scrum Master",
+                    "The Product Owner",
+                    "The Development Team",
+                    "The Stakeholder"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: The Product Owner manages and prioritizes the backlog."
+            },
+            {
+                question: "Following the 'Design' stage, what is the next phase in the Mendix Application Lifecycle?",
+                options: [
+                    "Prototyping",
+                    "Development",
+                    "User Acceptance Testing",
+                    "Deployment"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Development follows Design in the Mendix lifecycle."
+            },
+            {
+                question: "What is the role of an enumeration attribute in a Mendix Domain Model?",
+                options: [
+                    "To store a list of predefined constant values",
+                    "To define a numeric value that auto-increments",
+                    "To represent a binary true/false decision",
+                    "To store large amounts of text"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: Enumerations restrict attributes to fixed options like statuses or types."
+            },
+            {
+                question: "Which widget displays custom validation messages on a page?",
+                options: [
+                    "Data view",
+                    "Feedback widget",
+                    "Validation message widget",
+                    "Text box"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: This widget is designed for validation feedback."
+            },
+            {
+                question: "Which Agile framework is primarily adopted by Mendix?",
+                options: [
+                    "Extreme Programming (XP)",
+                    "Lean Software Development",
+                    "Scrum",
+                    "Kanban"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Mendix uses Scrum for iterative development."
+            },
+            {
+                question: "What is the benefit of 'calculated attributes' in a Domain Model?",
+                options: [
+                    "They ensure data consistency by calculating values based on other attributes",
+                    "They store user input without validation",
+                    "They encrypt sensitive data",
+                    "They generate unique identifiers"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: Calculated attributes auto-update based on logic."
+            },
+            {
+                question: "What is the main function of a decision activity in a microflow?",
+                options: [
+                    "To merge multiple flows into one",
+                    "To distribute database queries",
+                    "To evaluate a condition and determine the flow of logic",
+                    "To execute actions unconditionally"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Decision activities branch microflows based on conditions."
+            },
+            {
+                question: "What does the 'Aggregate list' activity do in a microflow?",
+                options: [
+                    "Combines multiple lists into one",
+                    "Performs calculations (sum, average, count) on a list of objects",
+                    "Filters a list based on a condition",
+                    "Sorts a list by an attribute"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Aggregates are used for calculations on lists."
+            },
+            {
+                question: "What should a Mendix page name reflect for maintainability?",
+                options: [
+                    "The developer who created it",
+                    "The primary purpose or function of the page",
+                    "The number of widgets on the page",
+                    "The last modification date"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Descriptive names improve clarity."
+            },
+            {
+                question: "When should you use a 'Before commit' event handler?",
+                options: [
+                    "Before a user logs in",
+                    "Prior to an object being saved to the database",
+                    "After a page loads",
+                    "Following a microflow execution"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: It triggers validations before saving."
+            },
+            {
+                question: "What is the result of a Sprint in Scrum?",
+                options: [
+                    "A completed user story",
+                    "A set of finished and tested features",
+                    "A fully deployed application",
+                    "A new marketplace version"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Sprints deliver incremental, shippable features."
+            },
+            {
+                question: "How does security differ between Production and Prototype environments?",
+                options: [
+                    "Production requires HTTPS, Prototype does not",
+                    "Production has stricter password policies",
+                    "All Prototype users are administrators",
+                    "No difference"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Production enforces higher security standards."
+            },
+            {
+                question: "How do you include an out-of-scope attribute in a microflow expression?",
+                options: [
+                    "Use a 'Retrieve' activity to bring it into scope",
+                    "Ignore the attribute",
+                    "Manually type the attribute name",
+                    "Restart the microflow"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: Retrieving ensures the attribute is accessible."
+            },
+            {
+                question: "Which component defines the visual layout of a Mendix app?",
+                options: [
+                    "Microflows",
+                    "Pages",
+                    "Entities",
+                    "Security"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Pages structure the UI and layout."
+            },
+            {
+                question: "What term describes a page layout that adjusts to screen sizes?",
+                options: [
+                    "Adaptive design",
+                    "Fluid layout",
+                    "Responsive design",
+                    "Elastic interface"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Responsive design adapts dynamically."
+            },
+            {
+                question: "How do you validate an email attribute's format in a Domain Model?",
+                options: [
+                    "Regular expressions",
+                    "Enumeration",
+                    "Exclusive split",
+                    "Calculated attribute"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: Regex enforces email format rules."
+            },
+            {
+                question: "Which attribute property ensures uniqueness across entity instances?",
+                options: [
+                    "Default value",
+                    "AutoNumber",
+                    "Unique",
+                    "Indexed"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: The 'Unique' property enforces value uniqueness."
+            },
+            {
+                question: "What is the focus of the Daily Stand-up in Scrum?",
+                options: [
+                    "Discuss new stakeholder requests",
+                    "Critique the previous day's work",
+                    "Provide status updates and identify blockers",
+                    "Plan tasks for the next Sprint"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Stand-ups sync the team on progress."
+            },
+            {
+                question: "What is the primary use of a 'Container' widget?",
+                options: [
+                    "Store files/images",
+                    "Execute server-side logic",
+                    "Group widgets and control layout",
+                    "Serve as a navigation bar"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Containers organize UI elements."
+            },
+            {
+                question: "What happens when a 'Break' event is encountered in a loop?",
+                options: [
+                    "The microflow stops entirely",
+                    "The loop terminates, and the microflow continues after it",
+                    "The loop skips to the next iteration",
+                    "The event is ignored"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: 'Break' exits the loop only."
+            },
+            {
+                question: "Which resource helps Mendix users collaborate on problem-solving?",
+                options: [
+                    "Mendix Tech Blogs",
+                    "Mendix Community Forum",
+                    "Online Documentation",
+                    "Support Chat"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: The Forum enables knowledge sharing."
+            },
+            {
+                question: "How do you handle a microflow decision based on file upload ($FileDocument/Size > 0)?",
+                options: [
+                    "Halt until a file is uploaded",
+                    "Branch based on the file's presence/absence",
+                    "Upload a default file",
+                    "Ignore file size"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Conditional branching handles both cases."
+            },
+            {
+                question: "How do you model a 'Patient' with multiple 'Doctors', and each 'Doctor' has multiple 'Patients'?",
+                options: [
+                    "One-to-One",
+                    "One-to-Many",
+                    "Many-to-Many",
+                    "Self-Association"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Many-to-Many fits bidirectional relationships."
+            },
+            {
+                question: "What is the main use of a 'Container' widget?",
+                options: [
+                    "Execute microflows",
+                    "Store temporary data",
+                    "Group widgets and control layout",
+                    "Act as a placeholder"
+                ],
+                correctAnswer: 2,
+                feedback: "Correct: Containers structure page layouts."
+            },
+            {
+                question: "How do you increment an attribute by 1 in a microflow?",
+                options: [
+                    "Loop with a counter",
+                    "'Change Object' with an addition expression",
+                    "Create a new object",
+                    "Subtract a negative value"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: This is the most efficient method."
+            },
+            {
+                question: "What is the upper limit of outgoing flows for a merge element?",
+                options: [
+                    "One",
+                    "Two",
+                    "Unlimited",
+                    "Five"
+                ],
+                correctAnswer: 0,
+                feedback: "Correct: Merges consolidate flows into a single path."
+            },
+            {
+                question: "What does an 'Exclusive merge' activity do?",
+                options: [
+                    "Creates a new path",
+                    "Combines splits into a single path",
+                    "Executes an operation on an object",
+                    "Merges database records"
+                ],
+                correctAnswer: 1,
+                feedback: "Correct: Merges unify branched flows."
+            },
+            {
+                question: "Which microflow activity validates data before committing to the database?",
+                options: [
+                    "Retrieve",
+                    "Change",
+                    "Aggregate",
+                    "Validation feedback"
+                ],
+                correctAnswer: 3,
+                feedback: "Correct: This activity enforces data validation rules before saving to the database."
+            }
+        ];
+        // Shuffle questions for randomness
+        questions.sort(() => Math.random() - 0.5);
+        // Initialize quiz
+        document.addEventListener('DOMContentLoaded', () => {
+            startTimer();
+            loadQuestion();
+        });
+        
+
+
+        // State variables
+        let currentQuestion = 0;
+        let selectedOption = null;
+        let userAnswers = new Array(questions.length).fill(null);
+        let score = 0;
+        let correctAnswers = 0;
+        let quizSubmitted = false;
+        let startTime, endTime;
+        let timerInterval;
+
+        // DOM elements
+        const questionElement = document.getElementById('question');
+        const questionNumberElement = document.getElementById('question-number');
+        const optionsElement = document.getElementById('options');
+        const feedbackElement = document.getElementById('feedback');
+        const questionCounterElement = document.getElementById('question-counter');
+        const progressFillElement = document.getElementById('progress-fill');
+        const scoreDisplayElement = document.getElementById('score-display');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results');
+        const scoreElement = document.getElementById('score');
+        const timeSummaryElement = document.getElementById('time-summary');
+        const detailedResultsElement = document.getElementById('detailed-results');
+        const restartBtn = document.getElementById('restart-btn');
+        const timerElement = document.getElementById('timer');
+
+        // Start timer
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Update timer
+        function updateTimer() {
+            const currentTime = new Date();
+            const elapsedTime = new Date(currentTime - startTime);
+            const hours = String(elapsedTime.getUTCHours()).padStart(2, '0');
+            const minutes = String(elapsedTime.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(elapsedTime.getUTCSeconds()).padStart(2, '0');
+            
+            timerElement.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            // Add warning after 30 minutes
+            if (elapsedTime.getUTCMinutes() >= 30) {
+                timerElement.classList.add('time-warning');
+            }
+        }
+
+        // Stop timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+            endTime = new Date();
+        }
+
+        // Format time
+        function formatTime(ms) {
+            const date = new Date(ms);
+            const hours = String(date.getUTCHours()).padStart(2, '0');
+            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Load question
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            questionNumberElement.textContent = `Question ${currentQuestion + 1}`;
+            questionElement.textContent = question.question;
+            
+            optionsElement.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                if (userAnswers[currentQuestion] === index) {
+                    optionElement.classList.add('selected');
+                    selectedOption = index;
+                }
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsElement.appendChild(optionElement);
+            });
+            
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            feedbackElement.style.display = 'none';
+            
+            questionCounterElement.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            progressFillElement.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+            
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            submitBtn.style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+
+            if (quizSubmitted) {
+                showFeedback();
+            }
+        }
+
+        // Select option
+        function selectOption(index) {
+            if (quizSubmitted) return;
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected', 'correct', 'incorrect'));
+            
+            options[index].classList.add('selected');
+            selectedOption = index;
+            userAnswers[currentQuestion] = index;
+            
+            // Evaluate answer immediately
+            evaluateAnswer();
+        }
+
+        // Evaluate answer
+        function evaluateAnswer() {
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const userAnswer = userAnswers[currentQuestion];
+            
+            // Mark correct answer
+            options[question.correctAnswer].classList.add('correct');
+            
+            // If user selected an answer
+            if (userAnswer !== null) {
+                if (userAnswer === question.correctAnswer) {
+                    options[userAnswer].classList.add('correct');
+                    feedbackElement.textContent = `✅ Correct! ${question.feedback}`;
+                    feedbackElement.classList.add('correct-feedback');
+                } else {
+                    options[userAnswer].classList.add('incorrect');
+                    feedbackElement.textContent = `❌ Incorrect. ${question.feedback}`;
+                    feedbackElement.classList.add('incorrect-feedback');
+                }
+                feedbackElement.style.display = 'block';
+                
+                // Update score display
+                updateScoreDisplay();
+            }
+        }
+
+        // Update score display
+        function updateScoreDisplay() {
+            correctAnswers = 0;
+            questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    correctAnswers++;
+                }
+            });
+            
+            const percentage = Math.round((correctAnswers / questions.length) * 100);
+            scoreDisplayElement.textContent = `Score: ${percentage}%`;
+        }
+
+        // Navigation
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                selectedOption = userAnswers[currentQuestion];
+                loadQuestion();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = userAnswers[currentQuestion];
+                loadQuestion();
+            }
+        });
+
+        // Submit exam
+        submitBtn.addEventListener('click', () => {
+            quizSubmitted = true;
+            stopTimer();
+            calculateScore();
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+        });
+
+        // Calculate score
+        function calculateScore() {
+            score = 0;
+            let resultsHTML = '<h3>Detailed Results:</h3><ol>';
+            
+            questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    score++;
+                    resultsHTML += `
+                        <li class="correct">
+                            <strong>Question ${index + 1}:</strong> Correct
+                            <div class="explanation">${question.feedback}</div>
+                        </li>`;
+                } else {
+                    const userAnswerText = userAnswers[index] !== null ? 
+                        `Your answer: <span class="incorrect-answer">${question.options[userAnswers[index]]}</span>` : 
+                        "No answer provided";
+                    resultsHTML += `
+                        <li class="incorrect">
+                            <strong>Question ${index + 1}:</strong> Incorrect<br>
+                            ${userAnswerText}<br>
+                            Correct answer: <span class="correct-answer">${question.options[question.correctAnswer]}</span><br>
+                            <div class="explanation">${question.feedback}</div>
+                        </li>`;
+                }
+            });
+            
+            resultsHTML += '</ol>';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const timeTaken = endTime - startTime;
+            
+            scoreElement.textContent = `Final Score: ${score} out of ${questions.length} (${percentage}%)`;
+            timeSummaryElement.textContent = `Time taken: ${formatTime(timeTaken)}`;
+            detailedResultsElement.innerHTML = resultsHTML;
+        }
+
+        // Restart exam
+        restartBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            selectedOption = null;
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            correctAnswers = 0;
+            quizSubmitted = false;
+            timerElement.classList.remove('time-warning');
+            
+            quizContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            scoreDisplayElement.textContent = "Score: 0%";
+            
+            // Reset and restart timer
+            clearInterval(timerInterval);
+            startTimer();
+            loadQuestion();
+        });
+
+        // Initialize
+        startTimer();
+        loadQuestion();
+    </script>
+</body>
+</html>
