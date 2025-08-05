@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificación Mendix Rapid Developer - Guía de Evaluación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.4;
+        }
+
+        .brochure {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            min-height: 800px;
+        }
+
+        .panel {
+            padding: 40px 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .panel-center {
+            background: #f8f9fa;
+            border-left: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .panel-right {
+            background: white;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title-icon {
+            font-size: 1.8rem;
+        }
+
+        .steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step {
+            counter-increment: step-counter;
+            margin-bottom: 20px;
+            padding-left: 50px;
+            position: relative;
+        }
+
+        .step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .step-description {
+            color: #5a6c7d;
+            font-size: 0.95rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .highlight-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .exam-details {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: #667eea;
+            width: 30px;
+            text-align: center;
+        }
+
+        .detail-content {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: #5a6c7d;
+            font-size: 0.85rem;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .warning-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .success-tips {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .tips-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .tips-list {
+            list-style: none;
+        }
+
+        .tip-item {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .tip-item::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .contact-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .requirement-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-top: 4px solid #667eea;
+        }
+
+        .requirement-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .requirement-label {
+            font-size: 0.9rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .requirement-desc {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 1024px) {
+            .brochure {
+                grid-template-columns: 1fr;
+                max-width: 800px;
+            }
+            
+            .panel {
+                padding: 30px 25px;
+            }
+            
+            .requirements-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .brochure {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="brochure">
+        <!-- Panel Izquierdo -->
+        <div class="panel panel-left">
+            <div class="header">
+                <div class="logo">🎓</div>
+                <h1 class="title">Certificación Mendix</h1>
+                <p class="subtitle">Rapid Developer</p>
+            </div>
+
+            <div class="exam-details">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">📊 Detalles del Examen</h3>
+                
+                <div class="detail-item">
+                    <div class="detail-icon">📝</div>
+                    <div class="detail-content">
+                        <div class="detail-label">Preguntas</div>
+                        <div class="detail-value">50 preguntas de opción múltiple</div>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-icon">📚</div>
+                    <div class="detail-content">
+                        <div class="detail-label">Módulos</div>
+                        <div class="detail-value">10 módulos de 5 preguntas cada uno</div>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-icon">⏱️</div>
+                    <div class="detail-content">
+                        <div class="detail-label">Duración</div>
+                        <div class="detail-value">Aproximadamente 1h 30min</div>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-icon">🌍</div>
+                    <div class="detail-content">
+                        <div class="detail-label">Idioma</div>
+                        <div class="detail-value">Inglés (Google Translate permitido)</div>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-icon">🔄</div>
+                    <div class="detail-content">
+                        <div class="detail-label">Intentos</div>
+                        <div class="detail-value">2 oportunidades (cada 24 horas)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="requirements-grid">
+                <div class="requirement-card">
+                    <div class="requirement-number">40+</div>
+                    <div class="requirement-label">Por Módulo</div>
+                    <div class="requirement-desc">Mínimo en cada uno</div>
+                </div>
+                <div class="requirement-card">
+                    <div class="requirement-number">75%</div>
+                    <div class="requirement-label">Global</div>
+                    <div class="requirement-desc">Calificación total</div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <div class="contact-info">
+                    <strong>📧 Instructores:</strong><br>
+                    <span style="font-size: 0.8rem;">anastaciorodriguez@utng.edu.mx</span><br>
+                    <span style="font-size: 0.8rem;">eric.domenzain@utng.edu.mx</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Central -->
+        <div class="panel panel-center">
+            <h2 class="section-title">
+                <span class="section-title-icon">🚀</span>
+                Proceso de Registro
+            </h2>
+
+            <ol class="steps">
+                <li class="step">
+                    <div class="step-title">Acceder a tu cuenta</div>
+                    <div class="step-description">Ingresa a tu cuenta de Mendix con tus credenciales</div>
+                </li>
+
+                <li class="step">
+                    <div class="step-title">Ir a Certificaciones</div>
+                    <div class="step-description">Navega a Academy >> Certifications o usa el link directo</div>
+                </li>
+
+                <li class="step">
+                    <div class="step-title">Seleccionar Rapid Developer</div>
+                    <div class="step-description">Haz clic en "View Details" en la certificación correspondiente</div>
+                </li>
+
+                <li class="step">
+                    <div class="step-title">Registrarse</div>
+                    <div class="step-description">Selecciona "Get Certified" para proceder</div>
+                </li>
+
+                <li class="step">
+                    <div class="step-title">Verificar datos</div>
+                    <div class="step-description">Confirma que tu nombre esté correcto (User Settings si necesitas cambios)</div>
+                </li>
+
+                <li class="step">
+                    <div class="step-title">Iniciar examen</div>
+                    <div class="step-description">Haz clic en "Register" para comenzar tu evaluación</div>
+                </li>
+            </ol>
+
+            <div class="highlight-box">
+                <div class="highlight-title">🔗 Link Directo</div>
+                <strong>academy.mendix.com/link/certifications</strong>
+                <br><br>
+                Utiliza este enlace para acceder directamente a la sección de certificaciones sin navegar por los menús.
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-title">⚠️ Datos Importantes</div>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Verifica tu nombre antes de registrarte</li>
+                    <li>El examen no está cronometrado</li>
+                    <li>Puedes usar Google Translate</li>
+                    <li>Resultados inmediatos al finalizar</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Panel Derecho -->
+        <div class="panel panel-right">
+            <h2 class="section-title">
+                <span class="section-title-icon">📋</span>
+                Criterios de Aprobación
+            </h2>
+
+            <div class="highlight-box">
+                <div class="highlight-title">📊 Requisitos para Aprobar</div>
+                <p><strong>Doble condición obligatoria:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Mínimo 40 puntos en <strong>cada módulo</strong></li>
+                    <li>Mínimo 75% de calificación <strong>global</strong></li>
+                </ul>
+                <p style="margin-top: 10px;"><em>Ambas condiciones deben cumplirse simultáneamente</em></p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">
+                    <span>⚠️</span>
+                    Importante
+                </div>
+                <p><strong>Solo 2 intentos disponibles</strong></p>
+                <p>No se pueden habilitar más oportunidades. Si no apruebas en el primer intento, contacta a tu instructor antes del segundo.</p>
+            </div>
+
+            <div class="success-tips">
+                <div class="tips-title">💡 Tips para el Éxito</div>
+                <ul class="tips-list">
+                    <li class="tip-item">Repasa los "knowledge checks" del curso</li>
+                    <li class="tip-item">Lee cada pregunta cuidadosamente</li>
+                    <li class="tip-item">Usa Google Translate si es necesario</li>
+                    <li class="tip-item">No te apresures, no hay límite de tiempo</li>
+                    <li class="tip-item">Revisa tus respuestas antes de enviar</li>
+                    <li class="tip-item">Mantén la calma y confía en tu preparación</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-title">📤 Después del Examen</div>
+                <p><strong>Si apruebas:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Recibirás los resultados inmediatamente</li>
+                    <li>Descarga tu certificado en PDF</li>
+                    <li>Envía tu certificado a tu instructor:</li>
+                    <li style="margin-left: 15px; font-size: 0.9rem;">📧 anastaciorodriguez@utng.edu.mx</li>
+                    <li style="margin-left: 15px; font-size: 0.9rem;">📧 eric.domenzain@utng.edu.mx</li>
+                    <li>¡Celebra tu logro! 🎉</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Si no apruebas:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Tendrás una segunda oportunidad la próxima semana</li>
+                    <li>Usa este tiempo para estudiar y prepararte mejor</li>
+                    <li>Contacta a tus instructores para apoyo adicional</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-title">🔄 Segunda Oportunidad</div>
+                <p><strong>Si no apruebas en el primer intento:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Tendrás una segunda oportunidad <strong>la próxima semana</strong></li>
+                    <li>Revisar los temas que fallaste</li>
+                    <li>Estudiar los materiales del curso</li>
+                    <li>Consultar con tus instructores:</li>
+                    <li style="margin-left: 15px; font-size: 0.9rem;">📧 anastaciorodriguez@utng.edu.mx</li>
+                    <li style="margin-left: 15px; font-size: 0.9rem;">📧 eric.domenzain@utng.edu.mx</li>
+                </ul>
+                <p style="margin-top: 15px; padding: 10px; background: rgba(255, 193, 7, 0.2); border-radius: 5px; font-weight: bold; color: #856404;">
+                    ⏰ Recuerda: Solo tienes 2 oportunidades en total
+                </p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">🎯 ¡Mucho Éxito!</h3>
+                <p style="color: #5a6c7d;">Tu preparación y dedicación te llevarán al éxito. Confía en tus conocimientos y demuestra todo lo que has aprendido.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
